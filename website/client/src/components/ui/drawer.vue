@@ -2,9 +2,12 @@
   <div class="drawer-container">
     <div
       class="drawer-title"
+      :class="{'no-padding': noTitleBottomPadding}"
       @click="toggle()"
     >
-      {{ title }}
+      <div  class="title-row">
+        <slot name="drawer-title-row">{{ title }}</slot>
+      </div>
       <div
         class="drawer-toggle-icon svg-icon icon-10"
         :class="{ closed: !isOpen }"
@@ -59,7 +62,7 @@
   .drawer-toggle-icon {
     position: absolute;
     right: 16px;
-    top: 16px;
+    bottom: 0;
 
     &.closed {
       top: 10px;
@@ -77,6 +80,21 @@
     line-height: 1.67;
     color: $white;
     padding: 6px 0;
+    display: flex;
+
+    &.no-padding {
+      padding-bottom: 0;
+    }
+  }
+
+  .title-row {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+
+    & > div {
+      flex: 1;
+    }
   }
 
   .drawer-content {
@@ -167,13 +185,15 @@ export default {
   props: {
     title: {
       type: String,
-      required: true,
     },
     errorMessage: {
       type: String,
     },
     openStatus: {
       type: Number,
+    },
+    noTitleBottomPadding: {
+      type: Boolean,
     },
   },
   data () {

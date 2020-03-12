@@ -45,6 +45,7 @@
         >
           {{ $t('equipment') }}
         </h1>
+
         <div class="float-right">
           <span class="dropdown-label">{{ $t('sortBy') }}</span>
           <b-dropdown
@@ -80,42 +81,77 @@
           </b-dropdown>
         </div>
       </div>
+
+      <div class="settings-line">
+        <div class="left-column">
+          <button
+            class="btn"
+            :class="{'btn-primary': !costumeMode, 'btn-light': costumeMode}"
+            @click="selectDrawerTab('equipment')"
+          >
+            {{ $t('battleGear') }}
+          </button>
+          <button
+            class="btn"
+            :class="{'btn-primary': costumeMode, 'btn-light': !costumeMode}"
+            @click="selectDrawerTab('costume')"
+          >
+            {{ $t('costume') }}
+          </button>
+        </div>
+        <div class="space"></div>
+        <div class="right-column">
+          <div class="toggle-group inline">
+            <toggle-switch
+              class="inline"
+              :label="$t(costumeMode ? 'useCostume' : 'autoEquipBattleGear')"
+              :checked="user.preferences[drawerPreference]"
+              :hover-text="$t(drawerPreference+'PopoverText')"
+              :bold-label="true"
+              @change="changeDrawerPreference"
+            />
+          </div>
+          <button class="btn btn-danger" @click="unequipItems()">
+            {{ $t(costumeMode ? 'unequipCostume' : 'unequipBattleGear') }}
+          </button>
+
+          <button class="btn btn-danger" @click="unequipPetMountBackground()">
+            {{ $t('unequipPetMountBackground') }}
+          </button>
+        </div>
+      </div>
       <drawer
-        :title="$t('equipment')"
+        :no-title-bottom-padding="true"
         :error-message="(costumeMode && !user.preferences.costume) ? $t('costumeDisabled') : null"
         :open-status="openStatus"
         @toggled="drawerToggled"
       >
+        <div slot="drawer-title-row" class="title-row-tabs">
+          <div class="drawer-tab">
+            <a
+              class="drawer-tab-text"
+              :class="{'drawer-tab-text-active': !costumeMode}"
+              @click.prevent.stop="selectDrawerTab('equipment')"
+            >{{ $t('battleGear') }}</a>
+          </div>
+          <div class="drawer-tab">
+            <a
+              class="drawer-tab-text"
+              :class="{'drawer-tab-text-active': costumeMode}"
+              @click.prevent.stop="selectDrawerTab('costume')"
+            >{{ $t('costume') }}</a>
+          </div>
+        </div>
         <div slot="drawer-header">
           <div class="drawer-tab-container">
-            <div class="drawer-tab text-right">
-              <a
-                class="drawer-tab-text"
-                :class="{'drawer-tab-text-active': !costumeMode}"
-                @click="selectDrawerTab('equipment')"
-              >{{ $t('equipment') }}</a>
-            </div>
             <div class="clearfix">
-              <div class="drawer-tab float-left">
-                <a
-                  class="drawer-tab-text"
-                  :class="{'drawer-tab-text-active': costumeMode}"
-                  @click="selectDrawerTab('costume')"
-                >{{ $t('costume') }}</a>
-              </div>
-              <toggle-switch
-                class="float-right align-with-tab"
-                :label="$t(costumeMode ? 'useCostume' : 'autoEquipBattleGear')"
-                :checked="user.preferences[drawerPreference]"
-                :hover-text="$t(drawerPreference+'PopoverText')"
-                @change="changeDrawerPreference"
-              />
+
             </div>
           </div>
         </div>
         <div
           slot="drawer-slider"
-          class="items items-one-line"
+          class="equipment items items-one-line"
         >
           <item
             v-for="(label, group) in gearTypesToStrings"
@@ -215,6 +251,8 @@
 </template>
 
 <style lang="scss">
+@import '~@/assets/scss/colors.scss';
+
 .pointer {
   cursor: pointer;
 }
@@ -225,6 +263,58 @@
 
 .drawer-tab-text {
   display: inline-block;
+}
+
+.equipment.items .item-empty {
+  background: $gray-10 !important;
+}
+
+</style>
+
+<style lang="scss" scoped>
+@import '~@/assets/scss/colors.scss';
+
+.btn-light {
+  color: $gray-50
+}
+
+.title-row-tabs {
+  display: flex;
+  justify-content: center;
+
+  .drawer-tab {
+    background: transparent;
+  }
+}
+
+.settings-line {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  .left-column, .right-column {
+    margin-bottom: 1.5rem;
+  }
+
+  .left-column * {
+//    margin-right: 0.5rem;
+  }
+
+  .right-column *:not(:first-child) {
+    margin-left: 0.5rem;
+  }
+
+  .space {
+    flex: 1;
+  }
+
+  .inline {
+    display: inline-block;
+  }
+
+  .toggle-group {
+    vertical-align: middle;
+  }
 }
 </style>
 
@@ -248,6 +338,9 @@ import Drawer from '@/components/ui/drawer';
 import i18n from '@/../../common/script/i18n';
 
 import EquipGearModal from './equipGearModal';
+
+// export constant to a different path?
+import { UNEQUIP_PET_MOUNT, UNEQUIP_COSTUME, UNEQUIP_EQUIPPED } from '../../../../../common/script/ops/unequip';
 
 const sortGearTypes = ['sortByName', 'sortByCon', 'sortByPer', 'sortByStr', 'sortByInt'];
 
@@ -500,6 +593,16 @@ export default {
         CONSTANTS.keyConstants.EQUIPMENT_DRAWER_STATE,
         CONSTANTS.drawerStateValues.DRAWER_CLOSED,
       );
+    },
+    unequipItems () {
+      this.$store.dispatch('user:unequip', {
+        type: this.costumeMode ? UNEQUIP_COSTUME : UNEQUIP_EQUIPPED,
+      });
+    },
+    unequipPetMountBackground () {
+      this.$store.dispatch('user:unequip', {
+        type: UNEQUIP_PET_MOUNT,
+      });
     },
   },
 };
