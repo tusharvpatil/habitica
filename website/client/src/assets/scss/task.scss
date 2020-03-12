@@ -8,10 +8,9 @@
           .daily-todo-control { background: rgba(255, 255, 255, 0.72) !important; }
         }
       }
-      &-bg-noninteractive {
-        background: $maroon-100 !important;
-      }
+      &-bg-noninteractive { background: $maroon-100 !important; }
       &-inner-habit { background: rgba(26, 24, 29, 0.24) !important; }
+      &-inner-habit-noninteractive { border: 1px solid $red-1 !important; }
       &-inner-daily-todo { background: $maroon-500 !important; }
       &-checkbox { color: $maroon-100 !important; }
       &-icon { color: #6c0406 !important; }
@@ -20,7 +19,9 @@
     &-modal {
       &-bg { background: $maroon-100 !important; }
       &-icon { color: $maroon-100 !important; }
-      &-text { color: $maroon-50 !important; }
+      &-text { color: $red-1 !important; }
+      &-text::placeholder { color: $red-1 !important; }
+      &-input:focus, &-input:active { border: 1px solid $red-1 !important; }
       &-option-disabled:hover {
         .svg-icon { color: $maroon-100 !important; }
         .option-item-label { color: $maroon-50 !important; }
@@ -41,10 +42,9 @@
           .daily-todo-control { background: rgba(255, 255, 255, 0.72) !important; }
         }
       }
-      &-bg-noninteractive {
-        background: $red-100 !important;
-      }
+      &-bg-noninteractive { background: $red-100 !important; }
       &-inner-habit { background: rgba(26, 24, 29, 0.24) !important; }
+      &-inner-habit-noninteractive { border: 1px solid $red-1 !important; }
       &-inner-daily-todo { background: $red-500 !important; }
       &-checkbox { color: $red-100 !important; }
       &-icon { color: #6c0406 !important; }
@@ -53,7 +53,9 @@
     &-modal {
       &-bg { background: $red-100 !important; }
       &-icon { color: $red-100 !important; }
-      &-text { color: $red-10 !important; }
+      &-text { color: $red-1 !important; }
+      &-text::placeholder { color: $red-1 !important; }
+      &-input:focus, &-input:active { border: 1px solid $red-1 !important; }
       &-option-disabled:hover {
         .svg-icon { color: $red-100 !important; }
         .option-item-label { color: $red-10 !important; }
@@ -75,29 +77,20 @@
           .daily-todo-control { background: rgba(255, 255, 255, 0.72) !important; }
         }
       }
-      &-bg-noninteractive {
-        background: $orange-100 !important;
-      }
+      &-bg-noninteractive { background: $orange-100 !important; }
       &-inner-habit { background: rgba(183, 90, 28, 0.4) !important; }
+      &-inner-habit-noninteractive { border: 1px solid $orange-1 !important; }
       &-inner-daily-todo { background: $orange-500 !important; }
       &-checkbox { color: $orange-100 !important; }
       &-icon { color: #7f3300 !important; }
     }
 
     &-modal {
-      &-bg {
-        background: $orange-100 !important;
-
-        .form-control {
-          background: rgba(183, 90, 28, 0.4) !important;
-
-          &:focus, &:active, &:hover {
-            background-color: #b75a1c !important;
-          }
-        }
-      }
+      &-bg { background: $orange-100 !important; }
       &-icon { color: $orange-100 !important; }
-      &-text { color: #b75a1c !important; }
+      &-text { color: $orange-1 !important; }
+      &-text::placeholder { color: $orange-1 !important; }
+      &-input:focus, &-input:active { border: 1px solid $orange-1 !important; }
       &-option-disabled:hover {
         .svg-icon { color: $orange-100 !important; }
         .option-item-label { color: #b75a1c !important; }
@@ -118,29 +111,20 @@
           .daily-todo-control { background: rgba(255, 255, 255, 0.72) !important; }
         }
       }
-      &-bg-noninteractive {
-        background: $yellow-100 !important;
-      }
+      &-bg-noninteractive { background: $yellow-100 !important; }
       &-inner-habit { background: rgba(183, 90, 28, 0.32) !important; }
+      &-inner-habit-noninteractive { border: 1px solid $yellow-1 !important; }
       &-inner-daily-todo { background: $yellow-500 !important; }
       &-checkbox { color: $yellow-100 !important; }
       &-icon { color: #794b00 !important; }
     }
 
     &-modal {
-      &-bg {
-        background: $yellow-100 !important;
-
-        .form-control {
-          background: rgba(183, 90, 28, 0.4) !important;
-
-          &:focus, &:active, &:hover {
-            background-color: #bf7d1a !important;
-          }
-        }
-      }
+      &-bg { background: $yellow-100 !important; }
       &-icon { color: $yellow-100 !important; }
-      &-text { color: #bf7d1a !important; }
+      &-text { color: $yellow-1 !important; }
+      &-text::placeholder { color: $yellow-1 !important; }
+      &-input:focus, &-input:active { border: 1px solid $yellow-1 !important; }
       &-option-disabled:hover {
         .svg-icon { color: $yellow-100 !important; }
         .option-item-label { color: #bf7d1a !important; }
@@ -161,10 +145,9 @@
           .daily-todo-control { background: rgba(255, 255, 255, 0.72) !important; }
         }
       }
-      &-bg-noninteractive {
-        background: $green-100 !important;
-      }
+      &-bg-noninteractive { background: $green-100 !important; }
       &-inner-habit { background: rgba(26, 24, 29, 0.24) !important; }
+      &-inner-habit-noninteractive { border: 1px solid $green-1 !important; }
       &-inner-daily-todo { background: #77f4c7 !important; }
       &-checkbox { color: $green-10 !important; }
       &-icon { color: #005737 !important; }
@@ -173,7 +156,9 @@
     &-modal {
       &-bg { background: $green-100 !important; }
       &-icon { color: $green-10 !important; }
-      &-text { color: #1ca372 !important; }
+      &-text { color: $green-1 !important; }
+      &-text::placeholder { color: $green-1 !important; }
+      &-input:focus, &-input:active { border: 1px solid $green-1 !important; }
       &-option-disabled:hover {
         .svg-icon { color: $green-10 !important; }
         .option-item-label { color: #1ca372 !important; }
@@ -194,10 +179,9 @@
           .daily-todo-control { background: rgba(255, 255, 255, 0.72) !important; }
         }
       }
-      &-bg-noninteractive {
-        background: $teal-100 !important;
-      }
+      &-bg-noninteractive { background: $teal-100 !important; }
       &-inner-habit { background: rgba(26, 24, 29, 0.24) !important; }
+      &-inner-habit-noninteractive { border: 1px solid $teal-1 !important; }
       &-inner-daily-todo { background: #8dedf6 !important; }
       &-checkbox { color: $teal-100 !important; }
       &-icon { color: #005158 !important; }
@@ -206,7 +190,9 @@
     &-modal {
       &-bg { background: $teal-100 !important; }
       &-icon { color: $teal-100 !important; }
-      &-text { color: $teal-10 !important; }
+      &-text { color: $teal-1 !important; }
+      &-text::placeholder { color: $teal-1 !important; }
+      &-input:focus, &-input:active { border: 1px solid $teal-1 !important; }
       &-option-disabled:hover {
         .svg-icon { color: $teal-100 !important; }
         .option-item-label { color: $teal-10 !important; }
@@ -227,10 +213,9 @@
           .daily-todo-control { background: rgba(255, 255, 255, 0.72) !important; }
         }
       }
-      &-bg-noninteractive {
-        background: $blue-100 !important;
-      }
+      &-bg-noninteractive { background: $blue-100 !important; }
       &-inner-habit { background: rgba(26, 24, 29, 0.24) !important; }
+      &-inner-habit-noninteractive { border: 1px solid $blue-1 !important; }
       &-inner-daily-todo { background: $blue-500 !important; }
       &-checkbox { color: $blue-100 !important; }
       &-icon { color: #033f5e !important; }
@@ -239,7 +224,9 @@
     &-modal {
       &-bg { background: $blue-100 !important; }
       &-icon { color: $blue-100 !important; }
-      &-text { color: $blue-10 !important; }
+      &-text { color: $blue-1 !important; }
+      &-text::placeholder { color: $blue-1 !important; }
+      &-input:focus, &-input:active { border: 1px solid $blue-1 !important; }
       &-option-disabled:hover {
         .svg-icon { color: $blue-50 !important; }
         .option-item-label { color: $blue-10 !important; }
@@ -268,7 +255,9 @@
     &-modal {
       &-bg { background: $purple-300 !important; }
       &-icon { color: $purple-300 !important; }
-      &-text { color: $purple-200 !important; }
+      &-text { color: $black !important; }
+      &-text::placeholder { color: $black !important; }
+      &-input:focus, &-input:active { border: 1px solid $black !important; }
       &-option-disabled:hover {
         .svg-icon { color: $purple-300 !important; }
         .option-item-label { color: $purple-200 !important; }

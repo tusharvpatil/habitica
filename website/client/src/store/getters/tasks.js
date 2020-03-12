@@ -127,6 +127,8 @@ export function getTaskClasses (store) {
         return `task-${color}-modal-text`;
       case 'edit-modal-icon':
         return `task-${color}-modal-icon`;
+      case 'edit-modal-input':
+        return `task-${color}-modal-text task-${color}-modal-input`;
       case 'edit-modal-option-disabled':
         return `task-${color}-modal-option-disabled`;
       case 'edit-modal-habit-control-disabled':
@@ -135,6 +137,8 @@ export function getTaskClasses (store) {
         return 'task-purple-modal-bg';
       case 'create-modal-text':
         return 'task-purple-modal-text';
+      case 'create-modal-input':
+        return 'task-purple-modal-text task-purple-modal-input';
       case 'create-modal-icon':
         return 'task-purple-modal-icon';
       case 'create-modal-option-disabled':
@@ -166,10 +170,18 @@ export function getTaskClasses (store) {
         } if (type === 'habit') {
           return {
             up: task.up
-              ? { bg: task.group && task.group.id && !task.userId ? `task-${color}-control-bg-noninteractive` : `task-${color}-control-bg`, inner: `task-${color}-control-inner-habit`, icon: `task-${color}-control-icon` }
+              ? {
+                bg: task.group && task.group.id && !task.userId ? `task-${color}-control-bg-noninteractive` : `task-${color}-control-bg`,
+                inner: task.group && task.group.id && !task.userId ? `task-${color}-control-inner-habit-noninteractive` : `task-${color}-control-inner-habit`,
+                icon: `task-${color}-control-icon`,
+              }
               : { bg: 'task-disabled-habit-control-bg', inner: 'task-disabled-habit-control-inner', icon: `task-${color}-control-icon` },
             down: task.down
-              ? { bg: task.group && task.group.id && !task.userId ? `task-${color}-control-bg-noninteractive` : `task-${color}-control-bg`, inner: `task-${color}-control-inner-habit`, icon: `task-${color}-control-icon` }
+              ? {
+                bg: task.group && task.group.id && !task.userId ? `task-${color}-control-bg-noninteractive` : `task-${color}-control-bg`,
+                inner: task.group && task.group.id && !task.userId ? `task-${color}-control-inner-habit-noninteractive` : `task-${color}-control-inner-habit`,
+                icon: `task-${color}-control-icon`,
+              }
               : { bg: 'task-disabled-habit-control-bg', inner: 'task-disabled-habit-control-inner', icon: `task-${color}-control-icon` },
           };
         }

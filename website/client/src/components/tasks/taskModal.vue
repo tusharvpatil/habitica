@@ -15,54 +15,75 @@
       :class="cssClass('bg')"
       @click="handleClick($event)"
     >
-      <div class="clearfix">
-        <h1 class="float-left">
+      <div class="d-flex align-items-center mt-2 mb-4">
+        <h2
+          class="mr-auto my-auto"
+          :class="cssClassHeadings"
+        >
           {{ title }}
-        </h1>
-        <div class="float-right d-flex align-items-center">
+        </h2>
+        <div class="ml-auto d-flex align-items-center">
           <span
-            v-once
-            class="cancel-task-btn mr-2"
+            class="cancel-task-btn mr-3"
+            :class="cssClassHeadings"
             @click="cancel()"
           >{{ $t('cancel') }}</span>
-          <button
-            v-once
-            class="btn btn-secondary"
+          <div
+            class="btn-save-task d-flex align-items-center justify-content-center"
+            :class="{disabled: !canSave}"
             @click="submit()"
           >
-            {{ $t('save') }}
-          </button>
+            <div
+              class="m-auto"
+              v-if="purpose === 'edit'"
+            >
+              {{ $t('save') }}
+            </div>
+            <div
+              class="m-auto"
+              v-if="purpose === 'create'"
+            >
+              {{ $t('create') }}
+            </div>
+          </div>
         </div>
       </div>
-      <div class="form-group">
-        <label v-once>{{ `${$t('text')}*` }}</label>
+      <div class="form-group mb-3">
+        <label
+          :class="cssClassHeadings"
+        >{{ `${$t('text')}*` }}</label>
         <input
           ref="inputToFocus"
           v-model="task.text"
-          class="form-control title-input"
+          class="form-control input-title"
+          :class="cssClass('input')"
           type="text"
           required="required"
           spellcheck="true"
           :disabled="groupAccessRequiredAndOnPersonalPage || challengeAccessRequired"
+          :placeholder="$t('addATitle')"
         >
       </div>
-      <div class="form-group">
+      <div class="form-group mb-0">
         <label
-          v-once
           class="d-flex align-items-center justify-content-between"
         >
-          <span>{{ $t('notes') }}</span>
-          <small v-once>
+          <span
+            :class="cssClassHeadings"
+          >{{ $t('notes') }}</span>
+          <small>
             <a
               target="_blank"
               href="http://habitica.fandom.com/wiki/Markdown_Cheat_Sheet"
+              :class="cssClassHeadings"
             >{{ $t('markdownHelpLink') }}</a>
           </small>
         </label>
         <textarea
           v-model="task.notes"
-          class="form-control"
-          rows="3"
+          class="form-control input-notes"
+          :class="cssClass('input')"
+          :placeholder="$t('notesUseMarkdown')"
         ></textarea>
       </div>
     </div>
@@ -147,49 +168,45 @@
           class="d-flex justify-content-center"
         >
           <div
-            class="option-item habit-control"
-            :class="task.up ? 'habit-control-enabled' : cssClass('habit-control-disabled')"
+            class="habit-option-container d-flex flex-column
+              justify-content-center align-items-center"
             @click="toggleUpDirection()"
           >
             <div
-              class="option-item-box"
-              :class="task.up ? cssClass('bg') : ''"
+              class="habit-option-button d-flex justify-content-center align-items-center mb-2"
+              :class="task.up ? cssClass('bg') : 'disabled'"
             >
-              <div class="task-control habit-control">
-                <div
-                  class="svg-icon positive"
-                  :class="task.up ? cssClass('icon') : ''"
-                  v-html="icons.positive"
-                ></div>
-              </div>
+              <div
+                class="habit-option-icon svg-icon"
+                :class="task.up ? '' : 'disabled'"
+                v-html="icons.positive"
+              ></div>
             </div>
             <div
-              class="option-item-label"
-              :class="task.up ? cssClass('text') : ''"
+              class="habit-option-label"
+              :class="task.up ? cssClass('icon') : 'disabled'"
             >
               {{ $t('positive') }}
             </div>
           </div>
           <div
-            class="option-item habit-control"
-            :class="task.down ? 'habit-control-enabled' : cssClass('habit-control-disabled')"
+            class="habit-option-container d-flex flex-column
+              justify-content-center align-items-center"
             @click="toggleDownDirection()"
           >
             <div
-              class="option-item-box"
-              :class="task.down ? cssClass('bg') : ''"
+              class="habit-option-button d-flex justify-content-center align-items-center mb-2"
+              :class="task.down ? cssClass('bg') : 'disabled'"
             >
-              <div class="task-control habit-control">
-                <div
-                  class="svg-icon negative"
-                  :class="task.down ? cssClass('icon') : ''"
-                  v-html="icons.negative"
-                ></div>
-              </div>
+              <div
+                class="habit-option-icon svg-icon negative mx-auto"
+                :class="task.down ? '' : 'disabled'"
+                v-html="icons.negative"
+              ></div>
             </div>
             <div
-              class="option-item-label"
-              :class="task.down ? cssClass('text') : ''"
+              class="habit-option-label"
+              :class="task.down ? cssClass('icon') : 'disabled'"
             >
               {{ $t('negative') }}
             </div>
@@ -600,7 +617,7 @@
           </div>
         </div>
         <div
-          v-if="task.type !== 'reward'"
+          v-if="advancedSettingsAvailable"
           class="advanced-settings"
         >
           <div
@@ -731,19 +748,13 @@
       @click="handleClick($event)"
     >
       <div
-        v-once
-        class="cancel-task-btn"
-        @click="cancel()"
-      >
-        {{ $t('cancel') }}
-      </div>
-      <button
-        v-once
-        class="btn btn-primary"
+        v-if="purpose === 'create'"
+        class="btn-save-task btn-footer d-flex align-items-center justify-content-center mb-2"
+        :class="{disabled: !canSave}"
         @click="submit()"
       >
-        {{ $t('save') }}
-      </button>
+        {{ $t('create') }}
+      </div>
     </div>
   </b-modal>
 </template>
@@ -766,17 +777,11 @@
 
     input, textarea {
       border: none;
-      background: rgba(0, 0, 0, 0.24);
-      color: rgba($white, 0.64) !important;
       transition-property: border-color, box-shadow, color, background;
-
-      &:focus, &:active {
-        color: $white !important;
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.32);
-      }
+      background-color: rgba(255, 255, 255, 0.5);
 
       &:focus, &:active, &:hover {
-        background-color: rgba(0, 0, 0, 0.40);
+        background-color: rgba(255, 255, 255, 0.75);
       }
     }
 
@@ -803,7 +808,7 @@
       padding-top: 16px;
       padding-bottom: 24px;
 
-      h1 {
+      h2 {
         color: $white;
       }
     }
@@ -1147,9 +1152,83 @@
 </style>
 
 <style lang="scss" scoped>
+  @import '~@/assets/scss/colors.scss';
+
+  .btn-save-task {
+    background-color: $white;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px 0 rgba(26, 24, 29, 0.12), 0 1px 2px 0 rgba(26, 24, 29, 0.24);
+    color: $gray-50;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    height: 2rem;
+    padding: 0.25rem 1rem;
+
+    &.btn-footer {
+      background-color: $purple-200;
+      color: $white;
+    }
+
+    &.disabled {
+      box-shadow: none;
+      cursor: default;
+      opacity: 0.75;
+    }
+  }
+
   .gold {
     width: 24px;
     margin: 0 7px;
+  }
+
+  .habit-option {
+    &-container {
+      min-width: 3rem;
+
+      &:first-of-type {
+        margin-right: 2rem;
+      }
+    }
+
+    &-button {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+
+      &.disabled {
+        border: 2px solid $gray-300;
+      }
+    }
+
+    &-icon {
+      width: 10px;
+      height: 10px;
+      color: $white;
+
+      &.disabled {
+        color: $gray-200;
+      }
+
+      &.negative {
+        margin-top: 0.5rem;
+      }
+    }
+
+    &-label {
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
+
+      &.disabled {
+        color: $gray-100;
+        font-weight: normal;
+      }
+    }
+  }
+
+  .input-notes {
+    height: 4rem;
   }
 </style>
 
@@ -1237,6 +1316,15 @@ export default {
       dayMapping: 'constants.DAY_MAPPING',
       ATTRIBUTES: 'constants.ATTRIBUTES',
     }),
+    advancedSettingsAvailable () {
+      if (
+        this.task.type === 'reward'
+        || this.task.type === 'todo'
+        || this.purpose === 'create'
+        || !this.isUserTask
+      ) return false;
+      return true;
+    },
     groupAccessRequiredAndOnPersonalPage () {
       if (!this.groupId && this.task.group && this.task.group.id) return true;
       return false;
@@ -1260,6 +1348,9 @@ export default {
     },
     canDelete () {
       return this.purpose !== 'create' && this.canDeleteTask(this.task);
+    },
+    canSave () {
+      return this.task && this.task.text && this.task.text.length > 0;
     },
     title () {
       const type = this.$t(this.task.type);
@@ -1304,6 +1395,11 @@ export default {
     },
     remainingSelectedTags () {
       return this.selectedTags.slice(this.maxTags);
+    },
+    cssClassHeadings () {
+      const textClass = this.cssClass('text');
+      if (textClass.indexOf('purple') !== -1 || textClass.indexOf('worst') !== -1) return null;
+      return textClass;
     },
   },
   watch: {
@@ -1434,6 +1530,7 @@ export default {
       }
     },
     async submit () {
+      if (!this.canSave) return;
       if (this.newChecklistItem) this.addChecklistItem();
 
       // TODO Fix up permissions on task.group so we don't have to keep doing these hacks
