@@ -24,12 +24,9 @@ export default {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const reqParams = { code: urlParams.get('code') };
-    console.log('apple redirect page'); // eslint-disable-line
     if (urlParams.has('name')) {
       reqParams.name = urlParams.get('name');
-      console.log('name passed', reqParams.name); // eslint-disable-line
     }
-    console.log('dispatching', reqParams); // eslint-disable-line
     await this.$store.dispatch('auth:appleAuth', reqParams);
 
     window.location.href = '/';

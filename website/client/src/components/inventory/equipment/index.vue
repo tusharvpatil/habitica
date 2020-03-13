@@ -111,11 +111,17 @@
               @change="changeDrawerPreference"
             />
           </div>
-          <button class="btn btn-danger" @click="unequipItems()">
+          <button
+            class="btn btn-danger"
+            @click="unequipItems()"
+          >
             {{ $t(costumeMode ? 'unequipCostume' : 'unequipBattleGear') }}
           </button>
 
-          <button class="btn btn-danger" @click="unequipPetMountBackground()">
+          <button
+            class="btn btn-danger"
+            @click="unequipPetMountBackground()"
+          >
             {{ $t('unequipPetMountBackground') }}
           </button>
         </div>
@@ -126,7 +132,10 @@
         :open-status="openStatus"
         @toggled="drawerToggled"
       >
-        <div slot="drawer-title-row" class="title-row-tabs">
+        <div
+          slot="drawer-title-row"
+          class="title-row-tabs"
+        >
           <div class="drawer-tab">
             <a
               class="drawer-tab-text"
@@ -145,7 +154,6 @@
         <div slot="drawer-header">
           <div class="drawer-tab-container">
             <div class="clearfix">
-
             </div>
           </div>
         </div>

@@ -34,14 +34,14 @@
             @click="submit()"
           >
             <div
-              class="m-auto"
               v-if="purpose === 'edit'"
+              class="m-auto"
             >
               {{ $t('save') }}
             </div>
             <div
-              class="m-auto"
               v-if="purpose === 'create'"
+              class="m-auto"
             >
               {{ $t('create') }}
             </div>

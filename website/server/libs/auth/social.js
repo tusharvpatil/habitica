@@ -45,7 +45,7 @@ async function _appleProfile (req) {
   } else if (passedToken) {
     idToken = await jwt.verify(passedToken, applePublicKey, { algorithms: ['RS256'] });
   }
-  console.log('_appleProfile', 'idToken', idToken, 'req.body', req.body, 'name idToken', idToken.name, 'name body', req.body.name, 'name params', req.query.name);
+
   return {
     id: idToken.sub,
     emails: [{ value: idToken.email }],
@@ -61,13 +61,9 @@ export async function loginSocial (req, res) { // eslint-disable-line import/pre
     .find(supportedNetwork => supportedNetwork.key === network);
   if (!isSupportedNetwork) throw new BadRequest(res.t('unsupportedNetwork'));
 
-  console.log('loginSocial');
-
   let profile = {};
   if (network === 'apple') {
-    console.log('loginSocial is apple');
     profile = await _appleProfile(req);
-    console.log('apple profile', profile);
   } else {
     const accessToken = req.body.authResponse.access_token;
     profile = await _passportProfile(network, accessToken);
@@ -81,13 +77,10 @@ export async function loginSocial (req, res) { // eslint-disable-line import/pre
 
   // User already signed up
   if (user) {
-    console.log('loginSocial found user');
     return loginRes(user, req, res);
   }
 
   const generatedUsername = generateUsername();
-
-  console.log('loginSocial', profile.displayName, profile.name, profile.username, profile.displayName || profile.name || profile.username);
 
   user = {
     auth: {

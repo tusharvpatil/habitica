@@ -5,8 +5,10 @@
       :class="{'no-padding': noTitleBottomPadding}"
       @click="toggle()"
     >
-      <div  class="title-row">
-        <slot name="drawer-title-row">{{ title }}</slot>
+      <div class="title-row">
+        <slot name="drawer-title-row">
+          {{ title }}
+        </slot>
       </div>
       <div
         class="drawer-toggle-icon svg-icon icon-10"
