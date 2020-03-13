@@ -154,15 +154,21 @@ api.redirectApple = {
   })],
   url: '/user/auth/apple',
   async handler (req, res) {
+    console.log('api.redirectApple, body:', req.body);
     if (req.body.id_token) {
+      console.log('has req.body.id_token, loginSocial');
       req.body.network = 'apple';
       return loginSocial(req, res);
     }
+    console.log('doesn\'t have req.body.id_token, redirect');
     let url = `/static/apple-redirect?code=${req.body.code}`;
     if (req.body.user) {
+      console.log('has req.body.user', req.body.user);
       const { name } = JSON.parse(req.body.user);
+      console.log('has name', name);
       url += `&name=${name.firstName} ${name.lastName}`;
     }
+    console.log('redirect to', url);
     return res.redirect(303, url);
   },
 };
@@ -175,6 +181,7 @@ api.loginApple = {
   })],
   url: '/user/auth/apple',
   async handler (req, res) {
+    console.log('api.loginApple, body:', req.body);
     req.body.network = 'apple';
     return loginSocial(req, res);
   },

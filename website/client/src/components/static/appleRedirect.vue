@@ -24,9 +24,12 @@ export default {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const body = { code: urlParams.get('code') };
+    console.log('apple redirect page');
     if (urlParams.has('name')) {
       body.name = urlParams.get('name');
+      console.log('name passed', body.name);
     }
+    console.log('dispatching', body);
     await this.$store.dispatch('auth:appleAuth', body);
 
     window.location.href = '/';
