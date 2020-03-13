@@ -23,14 +23,14 @@ export default {
   async mounted () {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const body = { code: urlParams.get('code') };
+    const reqParams = { code: urlParams.get('code') };
     console.log('apple redirect page'); // eslint-disable-line
     if (urlParams.has('name')) {
-      body.name = urlParams.get('name');
-      console.log('name passed', body.name); // eslint-disable-line
+      reqParams.name = urlParams.get('name');
+      console.log('name passed', reqParams.name); // eslint-disable-line
     }
-    console.log('dispatching', body); // eslint-disable-line
-    await this.$store.dispatch('auth:appleAuth', body);
+    console.log('dispatching', reqParams); // eslint-disable-line
+    await this.$store.dispatch('auth:appleAuth', reqParams);
 
     window.location.href = '/';
   },

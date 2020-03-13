@@ -174,6 +174,7 @@ api.redirectApple = {
 };
 
 // Called as a callback by Apple. Internal route
+// Can be passed `code` and `name` as query parameters
 api.loginApple = {
   method: 'GET',
   middlewares: [authWithHeaders({
@@ -181,7 +182,7 @@ api.loginApple = {
   })],
   url: '/user/auth/apple',
   async handler (req, res) {
-    console.log('api.loginApple, body:', req.body);
+    console.log('api.loginApple, body:', req.body, req.query);
     req.body.network = 'apple';
     return loginSocial(req, res);
   },

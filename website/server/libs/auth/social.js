@@ -45,11 +45,11 @@ async function _appleProfile (req) {
   } else if (passedToken) {
     idToken = await jwt.verify(passedToken, applePublicKey, { algorithms: ['RS256'] });
   }
-  console.log('_appleProfile', 'idToken', idToken, 'req.body', req.body, 'name idToken', idToken.name, 'name body', req.body.name);
+  console.log('_appleProfile', 'idToken', idToken, 'req.body', req.body, 'name idToken', idToken.name, 'name body', req.body.name, 'name params', req.query.name);
   return {
     id: idToken.sub,
     emails: [{ value: idToken.email }],
-    name: idToken.name || req.body.name,
+    name: idToken.name || req.body.name || req.query.name,
   };
 }
 
