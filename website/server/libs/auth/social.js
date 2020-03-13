@@ -8,6 +8,7 @@ import {
   generateUsername,
   loginRes,
 } from './utils';
+import { appleProfile } from './apple';
 import { model as User } from '../../models/user';
 import { model as EmailUnsubscription } from '../../models/emailUnsubscription';
 import { sendTxn as sendTxnEmail } from '../email';
@@ -63,7 +64,7 @@ export async function loginSocial (req, res) { // eslint-disable-line import/pre
 
   let profile = {};
   if (network === 'apple') {
-    profile = await _appleProfile(req);
+    profile = await appleProfile(req);
   } else {
     const accessToken = req.body.authResponse.access_token;
     profile = await _passportProfile(network, accessToken);
