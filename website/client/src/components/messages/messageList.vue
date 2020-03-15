@@ -6,23 +6,24 @@
     :options="psOptions"
   >
     <div class="row loadmore">
-      <div v-if="canLoadMore && !isLoading">
+      <div v-if="canLoadMoreBefore && !isLoading.before">
         <div class="loadmore-divider"></div>
         <button
           class="btn btn-secondary"
-          @click="triggerLoad()"
+          @click="triggerLoad('before')"
         >
           {{ $t('loadEarlierMessages') }}
         </button>
         <div class="loadmore-divider"></div>
       </div>
       <h2
-        v-show="isLoading"
+        v-show="isLoading.before"
         class="col-12 loading"
       >
         {{ $t('loading') }}
       </h2>
     </div>
+
     <div
       v-for="(msg) in messages"
       :key="msg.id"
@@ -30,11 +31,10 @@
       :class="{ 'margin-right': user._id !== msg.uuid}"
     >
       <div
-        v-if="user._id !== msg.uuid"
         class="d-flex flex-grow-1"
       >
         <avatar
-          v-if="conversationOpponentUser"
+          v-if="user._id !== msg.uuid && conversationOpponentUser"
           class="avatar-left"
           :member="conversationOpponentUser"
           :avatar-only="true"
@@ -42,29 +42,21 @@
           :hide-class-badge="true"
           @click.native="showMemberModal(msg.uuid)"
         />
-        <div class="card card-right">
+        <div
+          class="card"
+          :class="{'card-right': user._id !== msg.uuid, 'card-left': user._id === msg.uuid}"
+        >
           <message-card
             :msg="msg"
+            :search-mode="searchMode"
             @message-removed="messageRemoved"
             @show-member-modal="showMemberModal"
             @message-card-mounted="itemWasMounted"
-          />
-        </div>
-      </div>
-      <div
-        v-if="user._id === msg.uuid"
-        class="d-flex flex-grow-1"
-      >
-        <div class="card card-left">
-          <message-card
-            :msg="msg"
-            @message-removed="messageRemoved"
-            @show-member-modal="showMemberModal"
-            @message-card-mounted="itemWasMounted"
+            @jump-to-context="jumpToContext"
           />
         </div>
         <avatar
-          v-if="user"
+          v-if="user && user._id === msg.uuid"
           class="avatar-right"
           :member="user"
           :avatar-only="true"
@@ -73,6 +65,24 @@
           @click.native="showMemberModal(msg.uuid)"
         />
       </div>
+    </div>
+    <div class="row loadmore">
+      <div v-if="canLoadMoreAfter && !isLoading.after">
+        <div class="loadmore-divider"></div>
+        <button
+          class="btn btn-secondary"
+          @click="triggerLoad('after')"
+        >
+          {{ $t('loadNewerMessages') }}
+        </button>
+        <div class="loadmore-divider"></div>
+      </div>
+      <h2
+        v-show="isLoading.after"
+        class="col-12 loading"
+      >
+        {{ $t('loading') }}
+      </h2>
     </div>
   </perfect-scrollbar>
 </template>
@@ -214,16 +224,19 @@ export default {
   },
   props: {
     chat: {},
-    isLoading: Boolean,
-    canLoadMore: Boolean,
+    isLoading: {},
+    canLoadMoreBefore: Boolean,
+    canLoadMoreAfter: Boolean,
     conversationOpponentUser: {},
+    searchMode: Boolean,
   },
   data () {
     return {
       currentDayDividerDisplay: moment().day(),
       loading: false,
-      handleScrollBack: false,
+      handleScrollBack: null,
       lastOffset: -1,
+      lastScrollTop: -1,
       disablePerfectScroll: false,
     };
   },
@@ -255,22 +268,27 @@ export default {
     },
   },
   methods: {
-    async triggerLoad () {
+    async triggerLoad (type) {
       const container = this.$refs.container.$el;
 
       // get current offset
       this.lastOffset = container.scrollTop - (container.scrollHeight - container.clientHeight);
+      this.lastScrollTop = container.scrollTop;
       // disable scroll
       // container.style.overflowY = 'hidden';
 
-      const canLoadMore = !this.isLoading && this.canLoadMore;
+      const canLoadMoreOfType = type === 'before'
+        ? this.canLoadMoreBefore
+        : this.canLoadMoreAfter;
+
+      const canLoadMore = !this.isLoading[type] && canLoadMoreOfType;
 
       if (canLoadMore) {
-        const triggerLoadResult = this.$emit('triggerLoad');
+        const triggerLoadResult = this.$emit('triggerLoad', { type });
 
         await triggerLoadResult;
 
-        this.handleScrollBack = true;
+        this.handleScrollBack = type;
       }
     },
     displayDivider (message) {
@@ -286,14 +304,23 @@ export default {
     },
     itemWasMounted: debounce(function itemWasMounted () {
       if (this.handleScrollBack) {
-        this.handleScrollBack = false;
+        const type = this.handleScrollBack;
+        this.handleScrollBack = null;
 
         const container = this.$refs.container.$el;
-        const offset = container.scrollHeight - container.clientHeight;
 
-        const newOffset = offset + this.lastOffset;
+        if (type === 'before') {
+          const offset = container.scrollHeight - container.clientHeight;
 
-        container.scrollTo(0, newOffset);
+          const newOffset = offset + this.lastOffset;
+
+          container.scrollTo(0, newOffset);
+        } else {
+          // keep scrollTop-position
+          const newOffset = this.lastScrollTop;
+
+          container.scrollTo(0, newOffset);
+        }
         // enable scroll again
         // container.style.overflowY = 'scroll';
       }
@@ -306,6 +333,9 @@ export default {
     },
     handleSelectChange () {
       this.disablePerfectScroll = false;
+    },
+    jumpToContext (msg) {
+      this.$emit('jump-to-context', msg);
     },
   },
 };
