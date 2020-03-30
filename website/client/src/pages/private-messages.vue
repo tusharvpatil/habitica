@@ -78,6 +78,14 @@
             @click="selectConversation(conversation.key)"
           />
         </div>
+
+        <button
+          class="btn btn-secondary"
+          v-if="canLoadMoreConversations"
+          @click="loadConversations()"
+        >
+          {{ $t('loadMore') }}
+        </button>
       </div>
       <div class="messages-column d-flex flex-column align-items-center">
         <!-- TODO: extract as sub components / merge? -->
@@ -86,7 +94,7 @@
              && selectedConversation.searchMode">
           <span>
             <span>
-              {{ $t('viewingOlderMessagesOf', {name: selectedConversation.name})}}
+              {{ $t('viewingOlderMessagesOf', {text: search})}}
               </span>
             <span class="divider"></span>
             <span class="jump-to-recent" @click="jumpToRecent()">
@@ -172,10 +180,8 @@
               class="flex-fill"
               :placeholder="$t('needsTextPlaceholder')"
               :maxlength="MAX_MESSAGE_LENGTH"
-              :class="{'has-content': newMessage !== '', 'disabled': newMessageDisabled}"
-              :style="{'--textarea-auto-height': textareaAutoHeight}"
+              :class="{'has-content': newMessage.trim() !== '', 'disabled': newMessageDisabled}"
               @keyup.ctrl.enter="sendPrivateMessage()"
-              @input="autoSize()"
             >
             </textarea>
           </div>
@@ -455,7 +461,12 @@
         background-color: $gray-500;
       }
 
-      min-height: var(--textarea-auto-height, 40px);
+      &:focus, &.has-content {
+        --textarea-auto-height: 80px
+      }
+
+      // 41 to fix visible scrollbar on one-line mode
+      min-height: var(--textarea-auto-height, 41px);
       max-height: var(--textarea-auto-height, 40px);
     }
   }
@@ -623,7 +634,9 @@ import faceAvatar from '@/components/faceAvatar';
 import Avatar from '@/components/avatar';
 import { EVENTS } from '@/libs/events';
 
-const MAX_TEXTAREA_HEIGHT = 80;
+// extract to a shared path
+const CONVERSATIONS_PER_PAGE = 10;
+const PM_PER_PAGE = 10;
 
 export default {
   components: {
@@ -655,6 +668,8 @@ export default {
       messages: [],
       messagesByConversation: {}, // cache {uuid: []}
       loadedConversations: [],
+      conversationPage: 0,
+      canLoadMoreConversations: false,
       loaded: false,
       messagesLoading: {
         before: false,
@@ -876,25 +891,36 @@ export default {
       this.selectedConversation = {};
       this.messagesByConversation = {};
       this.loadedConversations = [];
+      this.conversationPage = 0;
 
-      const query = ['/api/v4/inbox/conversations'];
-
-      if (options.search) {
-        query.push(`?searchMessage=${options.search}`);
-      }
-
-      const conversationRes = await axios.get(query.join(''));
-      this.loadedConversations = conversationRes.data.data;
-
-      for (const conv of this.loadedConversations) {
-        conv.searchMode = !!options.search;
-      }
+      await this.loadConversations(options.search);
 
       if (options.markAsRead) {
         await this.$store.dispatch('user:markPrivMessagesRead');
       }
 
       this.loaded = true;
+    },
+    async loadConversations (search = '') {
+      const query = ['/api/v4/inbox/conversations'];
+
+      if (search) {
+        query.push(`?searchMessage=${search}`);
+      } else {
+        query.push(`?page=${this.conversationPage}`);
+        this.conversationPage += 1;
+      }
+
+      const conversationRes = await axios.get(query.join(''));
+      const loadedConversations = conversationRes.data.data;
+
+      for (const conv of loadedConversations) {
+        conv.searchMode = !!search;
+      }
+
+      this.canLoadMoreConversations = loadedConversations.length === CONVERSATIONS_PER_PAGE;
+
+      this.loadedConversations.push(...loadedConversations);
     },
     messageRemoved (message) {
       const messages = this.messagesByConversation[this.selectedConversation.key];
@@ -982,7 +1008,6 @@ export default {
       });
 
       this.newMessage = '';
-      this.autoSize();
     },
     removeTags (html) {
       const tmp = document.createElement('DIV');
@@ -1060,24 +1085,8 @@ export default {
 
       // only show the load more Button if the max count was returned
       this.messagesByConversation[conversationKey] = messagesList;
-      this.selectedConversation.canLoadMore[type] = !this.search && loadedMessages.length === 10;
+      this.selectedConversation.canLoadMore[type] = loadedMessages.length === PM_PER_PAGE;
       this.messagesLoading[type] = false;
-    },
-    autoSize () {
-      const { textarea } = this.$refs;
-      // weird issue: browser only removing the scrollHeight / clientHeight per key event - 56-54-52
-      let { scrollHeight } = textarea;
-
-      if (this.newMessage === '') {
-        // reset height when the message was removed again
-        scrollHeight = 40;
-      }
-
-      if (scrollHeight > MAX_TEXTAREA_HEIGHT) {
-        scrollHeight = MAX_TEXTAREA_HEIGHT;
-      }
-
-      this.textareaAutoHeight = `${scrollHeight}px`;
     },
     selectFirstConversation () {
       if (this.loadedConversations.length > 0) {
@@ -1126,6 +1135,7 @@ export default {
       // re-select the conversation
       this.selectedConversation = convoFound || {};
       this.selectedConversation.searchMode = false;
+      this.messagesByConversation[selectedConversationKey] = [];
 
       // select conversation & load messages from selected
       await this.loadMessages({
