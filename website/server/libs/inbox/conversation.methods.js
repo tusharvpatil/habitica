@@ -1,6 +1,5 @@
 import { inboxModel as Inbox, setUserStyles } from '../../models/message';
 import { model as User } from '../../models/user';
-import { createSearchParams } from './shared.methods';
 
 /**
  * Get the current user (avatar/setting etc) for conversations
@@ -44,18 +43,12 @@ async function usersMapByConversations (users) {
 
 const CONVERSATION_PER_PAGE = 10;
 
-export async function listConversations (owner, page = 0, searchMessage = null) {
-  let matchQuery = {
-    ownerId: owner._id,
-  };
-
-  if (searchMessage) {
-    matchQuery = Object.assign(matchQuery, createSearchParams(searchMessage));
-  }
-
+export async function listConversations (owner, page) {
   const aggregateQuery = [
     {
-      $match: matchQuery,
+      $match: {
+        ownerId: owner._id,
+      },
     },
     {
       $group: {
@@ -64,14 +57,13 @@ export async function listConversations (owner, page = 0, searchMessage = null) 
         username: { $last: '$username' },
         timestamp: { $last: '$timestamp' },
         text: { $last: '$text' },
-        messageId: { $last: '$id' },
         count: { $sum: 1 },
       },
     },
     { $sort: { timestamp: -1 } }, // sort by latest message
   ];
 
-  if (!searchMessage) {
+  if (page >= 0) {
     aggregateQuery.push({ $skip: page * CONVERSATION_PER_PAGE });
     aggregateQuery.push({ $limit: CONVERSATION_PER_PAGE });
   }

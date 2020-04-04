@@ -1,7 +1,6 @@
 import { mapInboxMessage, inboxModel as Inbox } from '../../models/message';
 import { getUserInfo, sendTxn as sendTxnEmail } from '../email'; // eslint-disable-line import/no-cycle
 import { sendNotification as sendPushNotification } from '../pushNotifications';
-import { createSearchParams } from './shared.methods';
 
 export async function sentMessage (sender, receiver, message, translate) {
   const messageSent = await sender.sendMessage(receiver, { receiverMsg: message });
@@ -32,7 +31,6 @@ export async function sentMessage (sender, receiver, message, translate) {
 
   return messageSent;
 }
-
 const PM_PER_PAGE = 10;
 
 const getUserInboxDefaultOptions = {
@@ -76,57 +74,6 @@ export async function getUserInbox (user, optionParams = getUserInboxDefaultOpti
   messages.forEach(msg => { messagesObj[msg._id] = msg; });
 
   return messagesObj;
-}
-
-
-const searchUserInboxDefaultOptions = {
-  beforeTimestamp: null,
-  afterTimestamp: null,
-  conversation: null,
-  mapProps: false,
-  searchMessage: null,
-};
-
-// WIP remove once ready to merge
-export async function searchUserInbox (user, optionParams = searchUserInboxDefaultOptions) {
-  // if not all properties are passed, fill the default values
-  const options = { ...searchUserInboxDefaultOptions, ...optionParams };
-
-  let findObj = { ownerId: user._id };
-
-  if (options.conversation) {
-    findObj.uuid = options.conversation;
-  }
-
-  if (options.beforeTimestamp) {
-    findObj.timestamp = { $lte: options.beforeTimestamp };
-  }
-
-  if (options.afterTimestamp) {
-    findObj.timestamp = Object.assign(findObj.timestamp || {},
-      { $gte: options.afterTimestamp });
-  }
-
-  if (options.searchMessage) {
-    findObj = Object.assign(findObj, createSearchParams(options.searchMessage));
-  }
-
-  const query = Inbox
-    .find(findObj)
-    .sort({ timestamp: options.afterTimestamp ? 1 : -1 })
-    .limit(PM_PER_PAGE);
-
-  const messages = (await query.exec()).map(msg => {
-    const msgObj = msg.toJSON();
-
-    if (options.mapProps) {
-      mapInboxMessage(msgObj, user);
-    }
-
-    return msgObj;
-  });
-
-  return messages;
 }
 
 export async function getUserInboxMessage (user, messageId) {

@@ -52,13 +52,6 @@
             @change="toggleOpt()"
           />
         </div>
-        <div class="search-section">
-          <b-form-input
-            v-model="search"
-            class="input-search"
-            :placeholder="$t('search')"
-          />
-        </div>
         <div
           v-if="filtersConversations.length > 0"
           class="conversations"
@@ -78,7 +71,6 @@
             @click="selectConversation(conversation.key)"
           />
         </div>
-
         <button
           class="btn btn-secondary"
           v-if="canLoadMoreConversations"
@@ -88,20 +80,6 @@
         </button>
       </div>
       <div class="messages-column d-flex flex-column align-items-center">
-        <!-- TODO: extract as sub components / merge? -->
-        <div class="jump-to-recent-bar"
-             v-if="selectedConversation && selectedConversationMessages.length > 0
-             && selectedConversation.searchMode">
-          <span>
-            <span>
-              {{ $t('viewingOlderMessagesOf', {text: search})}}
-              </span>
-            <span class="divider"></span>
-            <span class="jump-to-recent" @click="jumpToRecent()">
-              {{ $t('jumpToRecent')}}
-            </span>
-          </span>
-        </div>
         <div
           v-if="filtersConversations.length === 0
             && (!selectedConversation || !selectedConversation.key)"
@@ -153,15 +131,12 @@
           v-if="selectedConversation && selectedConversationMessages.length > 0"
           ref="chatscroll"
           class="message-scroll"
-          :search-mode="selectedConversation.searchMode"
           :chat="selectedConversationMessages"
           :conversation-opponent-user="selectedConversation.userStyles"
-          :can-load-more-before="selectedConversation.canLoadMore.before"
-          :can-load-more-after="selectedConversation.canLoadMore.after"
+          :can-load-more="canLoadMore"
           :is-loading="messagesLoading"
           @message-removed="messageRemoved"
-          @triggerLoad="triggerLoadMore"
-          @jump-to-context="jumpToContext"
+          @triggerLoad="infiniteScrollTrigger"
         />
         <div
           v-if="disabledTexts"
@@ -170,7 +145,7 @@
           <h4>{{ disabledTexts.title }}</h4>
           <p>{{ disabledTexts.description }}</p>
         </div>
-        <div>
+        <div class="full-width">
           <div
             class="new-message-row d-flex align-items-center"
           >
@@ -319,20 +294,6 @@
     margin-left: 12px;
   }
 
-  .input-search {
-    background-repeat: no-repeat;
-    background-position: center left 16px;
-    background-size: 16px 16px;
-    background-image: url(~@/assets/svg/for-css/search_gray.svg) !important;
-    padding-left: 40px;
-
-    height: 40px;
-  }
-
-  .input-search::placeholder {
-    color: $gray-200 !important;
-  }
-
   .selected-conversion {
     justify-content: center;
     align-items: center;
@@ -443,6 +404,10 @@
     }
   }
 
+  .full-width {
+    width: 100%;
+  }
+
   .new-message-row {
     width: 100%;
     padding-left: 1.5rem;
@@ -461,13 +426,12 @@
         background-color: $gray-500;
       }
 
-      &:focus, &.has-content {
+      &.has-content {
         --textarea-auto-height: 80px
       }
 
-      // 41 to fix visible scrollbar on one-line mode
-      min-height: var(--textarea-auto-height, 41px);
       max-height: var(--textarea-auto-height, 40px);
+      min-height: var(--textarea-auto-height, 40px);
     }
   }
 
@@ -533,11 +497,6 @@
     padding: 0;
     border-bottom-left-radius: 8px;
 
-    .search-section {
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid $gray-500;
-    }
-
     @media only screen and (max-width: 768px) {
       width: 280px;
     }
@@ -581,43 +540,13 @@
   .center-avatar {
     margin: 0 auto;
   }
-
-  .jump-to-recent-bar {
-    background-color: $blue-10;
-    width: 100%;
-    text-align: center;
-    height: 44px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: $white;
-
-    .divider {
-      width: 1px;
-      height: 16px;
-      border: solid 1px $blue-100;
-      margin-left: 1rem;
-      margin-right: 1rem;
-    }
-
-    .jump-to-recent {
-      font-weight: bold;
-      cursor: pointer;
-    }
-  }
 </style>
 
 <script>
 import Vue from 'vue';
 import moment from 'moment';
-// import filter from 'lodash/filter';
 import groupBy from 'lodash/groupBy';
 import orderBy from 'lodash/orderBy';
-import debounce from 'lodash/debounce';
-import min from 'lodash/min';
-import max from 'lodash/max';
 import habiticaMarkdown from 'habitica-markdown';
 import axios from 'axios';
 import { MAX_MESSAGE_LENGTH } from '@/../../common/script/constants';
@@ -659,53 +588,40 @@ export default {
         messageIcon,
         mail,
       }),
-      selectedConversation: {},
-      search: '',
-      searchMode: false,
-      jumpContextMode: false,
-      newMessage: '',
-      showPopover: false,
-      messages: [],
-      messagesByConversation: {}, // cache {uuid: []}
-      loadedConversations: [],
-      conversationPage: 0,
-      canLoadMoreConversations: false,
       loaded: false,
-      messagesLoading: {
-        before: false,
-        after: false,
-      },
+      showPopover: false,
+
+      /* Conversation-specific data */
       initiatedConversation: null,
       updateConversationsCounter: 0,
-      textareaAutoHeight: undefined,
+      selectedConversation: {},
+      conversationPage: 0,
+      canLoadMoreConversations: false,
+      loadedConversations: [],
+      messagesByConversation: {}, // cache {uuid: []}
+
+      newMessage: '',
+      messages: [],
+      messagesLoading: false,
       MAX_MESSAGE_LENGTH: MAX_MESSAGE_LENGTH.toString(),
     };
-  },
-  watch: {
-    search: 'triggerSearch',
   },
   async mounted () {
     // notification click to refresh
     this.$root.$on(EVENTS.PM_REFRESH, async () => {
-      await this.reload({
-        markAsRead: true,
-      });
+      await this.reload();
 
       this.selectFirstConversation();
     });
 
     // header sync button
     this.$root.$on(EVENTS.RESYNC_COMPLETED, async () => {
-      await this.reload({
-        markAsRead: true,
-      });
+      await this.reload();
 
       this.selectFirstConversation();
     });
 
-    await this.reload({
-      markAsRead: true,
-    });
+    await this.reload();
 
     const data = this.$store.state.privateMessageOptions;
 
@@ -729,6 +645,9 @@ export default {
   },
   computed: {
     ...mapState({ user: 'user.data' }),
+    canLoadMore () {
+      return this.selectedConversation && this.selectedConversation.canLoadMore;
+    },
     conversations () {
       const inboxGroup = groupBy(this.loadedConversations, 'uuid');
 
@@ -765,14 +684,8 @@ export default {
             userStyles: recentMessage.userStyles,
             backer: recentMessage.backer,
             canReceive: recentMessage.canReceive,
-            canLoadMore: {
-              before: false,
-              after: false,
-            },
-            oldestTimestamp: null,
-            newestTimestamp: null,
+            canLoadMore: false,
             page: 0,
-            searchMode: recentMessage.searchMode || false,
           };
 
           convos.push(convoModel);
@@ -786,9 +699,7 @@ export default {
     /* eslint-disable vue/no-side-effects-in-computed-properties */
     selectedConversationMessages () {
       // Vue-subscribe to changes
-      const subscribeToUpdate = this.messagesLoading.before
-        || this.messagesLoading.after
-        || this.updateConversationsCounter > -1;
+      const subscribeToUpdate = this.messagesLoading || this.updateConversationsCounter > -1;
 
       const selectedConversationKey = this.selectedConversation.key;
       const selectedConversation = this.messagesByConversation[selectedConversationKey];
@@ -804,9 +715,11 @@ export default {
     },
     filtersConversations () {
       // Vue-subscribe to changes
+      const subscribeToUpdate = this.updateConversationsCounter > -1;
 
-      const ordered = orderBy(this.conversations,
-        [o => moment(o.date).toDate()], ['desc']);
+      const filtered = subscribeToUpdate && this.conversations;
+
+      const ordered = orderBy(filtered, [o => o.date], ['desc']);
 
       return ordered;
     },
@@ -883,43 +796,26 @@ export default {
   },
 
   methods: {
-    async reload (options = {
-      markAsRead: false,
-      search: '',
-    }) {
+    async reload () {
       this.loaded = false;
-      this.selectedConversation = {};
-      this.messagesByConversation = {};
+
       this.loadedConversations = [];
-      this.conversationPage = 0;
+      this.selectedConversation = {};
 
-      await this.loadConversations(options.search);
+      await this.loadConversations();
 
-      if (options.markAsRead) {
-        await this.$store.dispatch('user:markPrivMessagesRead');
-      }
+      await this.$store.dispatch('user:markPrivMessagesRead');
 
       this.loaded = true;
     },
-    async loadConversations (search = '') {
+    async loadConversations () {
       const query = ['/api/v4/inbox/conversations'];
-
-      if (search) {
-        query.push(`?searchMessage=${search}`);
-      } else {
-        query.push(`?page=${this.conversationPage}`);
-        this.conversationPage += 1;
-      }
+      query.push(`?page=${this.conversationPage}`);
+      this.conversationPage += 1;
 
       const conversationRes = await axios.get(query.join(''));
       const loadedConversations = conversationRes.data.data;
-
-      for (const conv of loadedConversations) {
-        conv.searchMode = !!search;
-      }
-
       this.canLoadMoreConversations = loadedConversations.length === CONVERSATIONS_PER_PAGE;
-
       this.loadedConversations.push(...loadedConversations);
     },
     messageRemoved (message) {
@@ -946,20 +842,13 @@ export default {
       this.selectedConversation = convoFound || {};
 
       if (!this.messagesByConversation[this.selectedConversation.key] || forceLoadMessage) {
-        await this.loadMessages({ type: 'before' });
+        await this.loadMessages();
       }
 
       this.scrollToBottom();
     },
-    async sendPrivateMessage () {
+    sendPrivateMessage () {
       if (!this.newMessage) return;
-
-      if (this.searchMode) {
-        // reset message list
-        this.selectedConversation.page = 0;
-        // reload current view
-        await this.loadMessages({ type: 'before', disableSearchMode: true });
-      }
 
       const messages = this.messagesByConversation[this.selectedConversation.key];
 
@@ -1009,6 +898,13 @@ export default {
 
       this.newMessage = '';
     },
+    scrollToBottom () {
+      Vue.nextTick(() => {
+        if (!this.$refs.chatscroll) return;
+        const chatscroll = this.$refs.chatscroll.$el;
+        chatscroll.scrollTop = chatscroll.scrollHeight;
+      });
+    },
     removeTags (html) {
       const tmp = document.createElement('DIV');
       tmp.innerHTML = html;
@@ -1018,132 +914,45 @@ export default {
       if (!text) return null;
       return habiticaMarkdown.render(String(text));
     },
-    triggerLoadMore (params) {
-      const type = params.type || 'before';
+    infiniteScrollTrigger () {
+      // show loading and wait until the loadMore debounced
+      // or else it would trigger on every scrolling-pixel (while not loading)
+      if (this.canLoadMore) {
+        this.messagesLoading = true;
+      }
 
-      const timestamp = type === 'before'
-        ? this.selectedConversation.oldestTimestamp
-        : this.selectedConversation.newestTimestamp;
-
-      this.selectedConversation.page += 1;
-
-      return this.loadMessages({ type, timestamp });
+      return this.loadMore();
     },
-    async loadMessages ({ type, timestamp, disableSearchMode }) {
-      this.messagesLoading[type] = true;
-
-      let { searchMode } = this;
-
-      if (type && timestamp) {
-        searchMode = true;
-      }
-
-      if (disableSearchMode) {
-        searchMode = false;
-      }
+    loadMore () {
+      this.selectedConversation.page += 1;
+      return this.loadMessages();
+    },
+    async loadMessages () {
+      this.messagesLoading = true;
 
       // use local vars if the loading takes longer
       // and the user switches the conversation while loading
       const conversationKey = this.selectedConversation.key;
 
-      const baseUrl = searchMode ? '/api/v4/inbox/search-messages' : '/api/v4/inbox/paged-messages';
-
-      const params = [`conversation=${conversationKey}`];
-
-      if (searchMode) {
-        if (this.search && !this.jumpContextMode) {
-          params.push(`searchMessage=${this.search}`);
-        }
-
-        if (timestamp) {
-          if (type === 'before') {
-            params.push(`beforeTimestamp=${encodeURIComponent(timestamp)}`);
-          } else {
-            params.push(`afterTimestamp=${encodeURIComponent(timestamp)}`);
-          }
-        }
-      } else {
-        params.push(`page=${this.selectedConversation.page}`);
-      }
-
-      const requestUrl = `${baseUrl}?${params.join('&')}`;
+      const requestUrl = `/api/v4/inbox/paged-messages?conversation=${conversationKey}&page=${this.selectedConversation.page}`;
       const res = await axios.get(requestUrl);
       const loadedMessages = res.data.data;
 
       /* eslint-disable max-len */
-      const messagesList = this.messagesByConversation[conversationKey] || [];
-
+      this.messagesByConversation[conversationKey] = this.messagesByConversation[conversationKey] || [];
       /* eslint-disable max-len */
       const loadedMessagesToAdd = loadedMessages
-        .filter(m => messagesList.findIndex(mI => mI.id === m.id) === -1);
-      messagesList.push(...loadedMessagesToAdd);
-
-      const timestampList = messagesList.map(m => m.timestamp);
-
-      this.selectedConversation.oldestTimestamp = min(timestampList);
-      this.selectedConversation.newestTimestamp = max(timestampList);
+        .filter(m => this.messagesByConversation[conversationKey].findIndex(mI => mI.id === m.id) === -1);
+      this.messagesByConversation[conversationKey].push(...loadedMessagesToAdd);
 
       // only show the load more Button if the max count was returned
-      this.messagesByConversation[conversationKey] = messagesList;
-      this.selectedConversation.canLoadMore[type] = loadedMessages.length === PM_PER_PAGE;
-      this.messagesLoading[type] = false;
+      this.selectedConversation.canLoadMore = loadedMessages.length === PM_PER_PAGE;
+      this.messagesLoading = false;
     },
     selectFirstConversation () {
       if (this.loadedConversations.length > 0) {
         this.selectConversation(this.loadedConversations[0].uuid, true);
       }
-    },
-    triggerSearch: debounce(function triggerSearch () {
-      this.searchMode = Boolean(this.search);
-      this.jumpContextMode = false;
-      this.reload({
-        search: this.search,
-      });
-    }, 1300),
-    async jumpToContext (msg) {
-      const selectedConversationKey = this.selectedConversation.key;
-
-      const convoFound = this.conversations.find(conversation => conversation.key === selectedConversationKey);
-
-      // re-select the conversation
-      this.selectedConversation = convoFound || {};
-
-      this.jumpContextMode = true;
-
-      // select conversation & load messages from selected
-      await this.loadMessages({
-        type: 'before',
-        timestamp: msg.timestamp,
-      });
-
-      this.selectedConversation.canLoadMore.after = true; // enable initial load button
-
-      this.scrollToBottom();
-    },
-    scrollToBottom () {
-      Vue.nextTick(() => {
-        if (!this.$refs.chatscroll) return;
-        const chatscroll = this.$refs.chatscroll.$el;
-        chatscroll.scrollTop = chatscroll.scrollHeight;
-      });
-    },
-    async jumpToRecent () {
-      const selectedConversationKey = this.selectedConversation.key;
-
-      const convoFound = this.conversations.find(conversation => conversation.key === selectedConversationKey);
-
-      // re-select the conversation
-      this.selectedConversation = convoFound || {};
-      this.selectedConversation.searchMode = false;
-      this.messagesByConversation[selectedConversationKey] = [];
-
-      // select conversation & load messages from selected
-      await this.loadMessages({
-        type: 'before',
-        disableSearchMode: true,
-      });
-
-      this.scrollToBottom();
     },
   },
 };

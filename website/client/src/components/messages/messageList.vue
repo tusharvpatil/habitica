@@ -1,29 +1,30 @@
 <template>
-  <perfect-scrollbar
+  <div
     ref="container"
     class="container-fluid"
-    :class="{'disable-perfect-scroll': disablePerfectScroll}"
-    :options="psOptions"
   >
     <div class="row loadmore">
-      <div v-if="canLoadMoreBefore && !isLoading.before">
+      <div v-if="canLoadMore && !isLoading">
+        <div class="loadmore-divider-holder">
         <div class="loadmore-divider"></div>
+        </div>
         <button
           class="btn btn-secondary"
-          @click="triggerLoad('before')"
+          @click="triggerLoad()"
         >
           {{ $t('loadEarlierMessages') }}
         </button>
+      <div class="loadmore-divider-holder">
         <div class="loadmore-divider"></div>
       </div>
+      </div>
       <h2
-        v-show="isLoading.before"
+        v-show="isLoading"
         class="col-12 loading"
       >
         {{ $t('loading') }}
       </h2>
     </div>
-
     <div
       v-for="(msg) in messages"
       :key="msg.id"
@@ -48,11 +49,9 @@
         >
           <message-card
             :msg="msg"
-            :search-mode="searchMode"
             @message-removed="messageRemoved"
             @show-member-modal="showMemberModal"
             @message-card-mounted="itemWasMounted"
-            @jump-to-context="jumpToContext"
           />
         </div>
         <avatar
@@ -66,34 +65,11 @@
         />
       </div>
     </div>
-    <div class="row loadmore">
-      <div v-if="canLoadMoreAfter && !isLoading.after">
-        <div class="loadmore-divider"></div>
-        <button
-          class="btn btn-secondary"
-          @click="triggerLoad('after')"
-        >
-          {{ $t('loadNewerMessages') }}
-        </button>
-        <div class="loadmore-divider"></div>
-      </div>
-      <h2
-        v-show="isLoading.after"
-        class="col-12 loading"
-      >
-        {{ $t('loading') }}
-      </h2>
-    </div>
-  </perfect-scrollbar>
+  </div>
 </template>
 
 <style lang="scss" scoped>
   @import '~@/assets/scss/colors.scss';
-  @import '~vue2-perfect-scrollbar/dist/vue2-perfect-scrollbar.css';
-
-  .disable-perfect-scroll {
-    overflow-y: inherit !important;
-  }
 
   .avatar {
     width: 170px;
@@ -172,6 +148,8 @@
   .loadmore {
     justify-content: center;
     margin-right: 12px;
+    margin-top: 12px;
+    margin-bottom: 24px;
 
     > div {
       display: flex;
@@ -181,15 +159,11 @@
       button {
         text-align: center;
         color: $gray-50;
-        margin-top: 12px;
-        margin-bottom: 24px;
       }
     }
   }
 
-  .loadmore-divider {
-    height: 1px;
-    background-color: $gray-500;
+  .loadmore-divider-holder {
     flex: 1;
     margin-left: 24px;
     margin-right: 24px;
@@ -197,6 +171,13 @@
     &:last-of-type {
       margin-right: 0;
     }
+  }
+
+  .loadmore-divider {
+    height: 1px;
+    border-top: 1px $gray-500 solid;
+    width: 100%;
+
   }
 
   .loading {
@@ -210,7 +191,6 @@
 <script>
 import moment from 'moment';
 import debounce from 'lodash/debounce';
-import { PerfectScrollbar } from 'vue2-perfect-scrollbar';
 import { mapState } from '@/libs/store';
 
 import Avatar from '../avatar';
@@ -220,23 +200,19 @@ export default {
   components: {
     Avatar,
     messageCard,
-    PerfectScrollbar,
   },
   props: {
     chat: {},
-    isLoading: {},
-    canLoadMoreBefore: Boolean,
-    canLoadMoreAfter: Boolean,
+    isLoading: Boolean,
+    canLoadMore: Boolean,
     conversationOpponentUser: {},
-    searchMode: Boolean,
   },
   data () {
     return {
       currentDayDividerDisplay: moment().day(),
       loading: false,
-      handleScrollBack: null,
+      handleScrollBack: false,
       lastOffset: -1,
-      lastScrollTop: -1,
       disablePerfectScroll: false,
     };
   },
@@ -261,39 +237,30 @@ export default {
     messages () {
       return this.chat;
     },
-    psOptions () {
-      return {
-        suppressScrollX: true,
-      };
-    },
   },
   methods: {
-    async triggerLoad (type) {
-      const container = this.$refs.container.$el;
+    async triggerLoad () {
+      const { container } = this.$refs;
 
       // get current offset
       this.lastOffset = container.scrollTop - (container.scrollHeight - container.clientHeight);
-      this.lastScrollTop = container.scrollTop;
       // disable scroll
       // container.style.overflowY = 'hidden';
 
-      const canLoadMoreOfType = type === 'before'
-        ? this.canLoadMoreBefore
-        : this.canLoadMoreAfter;
-
-      const canLoadMore = !this.isLoading[type] && canLoadMoreOfType;
+      const canLoadMore = !this.isLoading && this.canLoadMore;
 
       if (canLoadMore) {
-        const triggerLoadResult = this.$emit('triggerLoad', { type });
+        const triggerLoadResult = this.$emit('triggerLoad');
 
         await triggerLoadResult;
 
-        this.handleScrollBack = type;
+        this.handleScrollBack = true;
       }
     },
     displayDivider (message) {
-      if (this.currentDayDividerDisplay !== moment(message.timestamp).day()) {
-        this.currentDayDividerDisplay = moment(message.timestamp).day();
+      const day = moment(message.timestamp).day();
+      if (this.currentDayDividerDisplay !== day) {
+        this.currentDayDividerDisplay = day;
         return true;
       }
 
@@ -304,23 +271,14 @@ export default {
     },
     itemWasMounted: debounce(function itemWasMounted () {
       if (this.handleScrollBack) {
-        const type = this.handleScrollBack;
-        this.handleScrollBack = null;
+        this.handleScrollBack = false;
 
-        const container = this.$refs.container.$el;
+        const { container } = this.$refs;
+        const offset = container.scrollHeight - container.clientHeight;
 
-        if (type === 'before') {
-          const offset = container.scrollHeight - container.clientHeight;
+        const newOffset = offset + this.lastOffset;
 
-          const newOffset = offset + this.lastOffset;
-
-          container.scrollTo(0, newOffset);
-        } else {
-          // keep scrollTop-position
-          const newOffset = this.lastScrollTop;
-
-          container.scrollTo(0, newOffset);
-        }
+        container.scrollTo(0, newOffset);
         // enable scroll again
         // container.style.overflowY = 'scroll';
       }
@@ -333,9 +291,6 @@ export default {
     },
     handleSelectChange () {
       this.disablePerfectScroll = false;
-    },
-    jumpToContext (msg) {
-      this.$emit('jump-to-context', msg);
     },
   },
 };

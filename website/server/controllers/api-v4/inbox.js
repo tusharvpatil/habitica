@@ -4,9 +4,7 @@ import {
   NotFound,
 } from '../../libs/errors';
 import { listConversations } from '../../libs/inbox/conversation.methods';
-import {
-  clearPMs, deleteMessage, getUserInbox, searchUserInbox,
-} from '../../libs/inbox';
+import { clearPMs, deleteMessage, getUserInbox } from '../../libs/inbox';
 
 const api = {};
 
@@ -83,7 +81,8 @@ api.clearMessages = {
  * This is for API v4 which must not be used in third-party tools.
  * For API v3, use "Get inbox messages for a user".
  *
- * @apiParam (Query) {String} searchMessage Lists only the conversations that contain this message
+ * @apiParam (Query) {Number} page (optional) Load the conversations of the selected Page
+ * - 10 conversations per Page
  *
  * @apiSuccess {Array} data An array of inbox conversations
  *
@@ -108,9 +107,9 @@ api.conversations = {
   url: '/inbox/conversations',
   async handler (req, res) {
     const { user } = res.locals;
-    const { searchMessage, page = 0 } = req.query;
+    const { page } = req.query;
 
-    const result = await listConversations(user, page, searchMessage);
+    const result = await listConversations(user, page);
 
     res.respond(200, result);
   },
@@ -138,46 +137,6 @@ api.getInboxMessages = {
 
     const userInbox = await getUserInbox(user, {
       page, conversation, mapProps: true,
-    });
-
-    res.respond(200, userInbox);
-  },
-};
-
-
-/**
- * @api {get} /api/v4/inbox/search-messages Search inbox messages for a user
- * @apiName SearchInboxMessages
- * @apiGroup Inbox
- * @apiDescription Search inbox messages for a user.
- * Entries already populated with the correct `sent` - information
- *
- * @apiParam (Query) {Timestamp} Optional beforeTimestamp
- * Load the messages before (less then equal) this timestamp
- * @apiParam (Query) {Timestamp} Optional afterTimestamp
- * Load the messages after (greater then equal) this timestamp
- * @apiParam (Query) {String} Optional searchMessage
- * Load the messages that contain this searchMessage-string
- * @apiParam (Query) {GUID} conversation Loads only the messages of a conversation
- *
- * @apiSuccess {Array} data An array of inbox messages
- */
-api.searchInboxMessages = {
-  method: 'GET',
-  url: '/inbox/search-messages',
-  middlewares: [authWithHeaders()],
-  async handler (req, res) {
-    const { user } = res.locals;
-    const {
-      beforeTimestamp, afterTimestamp, conversation, searchMessage,
-    } = req.query;
-
-    const userInbox = await searchUserInbox(user, {
-      beforeTimestamp,
-      afterTimestamp,
-      searchMessage,
-      conversation,
-      mapProps: true,
     });
 
     res.respond(200, userInbox);
