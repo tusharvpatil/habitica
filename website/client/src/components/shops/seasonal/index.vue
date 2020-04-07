@@ -609,7 +609,6 @@ export default {
       return false;
     },
     itemSelected (item) {
-      if (item.locked) return;
       this.$root.$emit('buyModal::showItem', item);
     },
   },

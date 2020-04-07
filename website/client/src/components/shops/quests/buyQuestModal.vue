@@ -29,7 +29,10 @@
     >
       <div class="inner-content">
         <questDialogContent :item="item" />
-        <div class="purchase-amount">
+        <div
+          class="purchase-amount"
+          v-if="!item.locked"
+        >
           <div class="how-many-to-buy">
             <strong>{{ $t('howManyToBuy') }}</strong>
           </div>
@@ -59,7 +62,8 @@
         </div>
         <button
           v-if="priceType === 'gems'
-            && !enoughCurrency(priceType, item.value * selectedAmountToBuy)"
+            && !enoughCurrency(priceType, item.value * selectedAmountToBuy)
+            && !item.locked"
           class="btn btn-primary"
           @click="purchaseGems()"
         >

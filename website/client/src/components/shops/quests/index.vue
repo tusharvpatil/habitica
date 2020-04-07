@@ -222,6 +222,7 @@
                 :price="item.value"
                 :empty-item="false"
                 :popover-position="'top'"
+                :owned="!isNaN(userItems.quests[item.key])"
                 @click="selectItem(item)"
               >
                 <span slot="popoverContent">
@@ -628,8 +629,6 @@ export default {
       return false;
     },
     selectItem (item) {
-      if (item.locked) return;
-
       this.selectedItemToBuy = item;
 
       this.$root.$emit('bv::show::modal', 'buy-quest-modal');

@@ -147,7 +147,7 @@
           v-else
           class="btn btn-primary"
           :disabled="item.key === 'gem' && gemsLeft === 0 ||
-            attemptingToPurchaseMoreGemsThanAreLeft || numberInvalid"
+            attemptingToPurchaseMoreGemsThanAreLeft || numberInvalid || item.locked"
           :class="{'notEnough': !preventHealthPotion ||
             !enoughCurrency(getPriceClass(), item.value * selectedAmountToBuy)}"
           @click="buyItem()"
