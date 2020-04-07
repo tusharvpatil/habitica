@@ -4,7 +4,7 @@ const api = {};
 
 // @TODO export this const, cannot export it from here because only routes are exported from
 // controllers
-const LAST_ANNOUNCEMENT_TITLE = 'EGG QUEST IN THE SEASONAL SHOP! AND HELPFUL RESOURCES FOR TOUGH TIMES';
+const LAST_ANNOUNCEMENT_TITLE = 'APRIL BACKGROUNDS AND ENCHANTED ARMOIRE ITEMS!';
 const worldDmg = { // @TODO
   bailey: false,
 };
@@ -31,28 +31,25 @@ api.getNews = {
           <div class="mr-3 ${baileyClass}"></div>
           <div class="media-body">
             <h1 class="align-self-center">${res.t('newStuff')}</h1>
-            <h2>3/24/2020 - ${LAST_ANNOUNCEMENT_TITLE}</h2>
+            <h2>4/6/2020 - ${LAST_ANNOUNCEMENT_TITLE}</h2>
           </div>
         </div>
         <hr/>
-        <div class="promo_egg_quest center-block"></div>
-        <h3>Egg Quest Available</h3>
+        <div class="promo_armoire_backgrounds_202004 center-block"></div>
         <p>
-          The Egg Quest is available again in the <a href='/shops/seasonal'>Seasonal Shop</a>!
-          Strange eggs are appearing all over Habitica. Can you collect them all to earn some
-          colorful Egg pets and mounts?
+          We’ve added three new backgrounds to the Background Shop! Now your avatar can splash in a
+          Rainy Barnyard, enjoy the aroma of a Heather Field, and gaze at shapeshifting Animal
+          Clouds. Check them out under User Icon > Backgrounds on web and Menu > Inventory >
+          Customize Avatar on mobile!
         </p>
-        <div class="small mb-3">by Megan, Beffymaroo, and Lemoness</div>
-        <div class="scene_tough_times center-block"></div>
-        <h3>Blog Post: Helpful Resources for Tough Times</h3>
         <p>
-          Hey Habiticans! We hope you're all staying safe and well during this stressful time.
-          We've put together some <a
-          href='https://habitica.wordpress.com/2020/03/20/helpful-resources-for-tough-times/'
-          target='_blank'>resources on the Habitica blog</a> for help with maintaining health and
-          wellness, setting up or changing a routine, and more! Take care, we love y'all.
+          Plus, there’s new Gold-purchasable equipment in the Enchanted Armoire, including the
+          Paper Knight Set. Better work hard on your real-life tasks to earn all the pieces!
+          Enjoy :)
         </p>
-        <div class="small mb-3">by the Habitica Team</div>
+        <div class="small mb-3">
+          by QuartzFox, gawrone, ravenlune, shanaqui, katieslug, -Tyr-, and SabreCat
+        </div>
       </div>
       `,
     });
