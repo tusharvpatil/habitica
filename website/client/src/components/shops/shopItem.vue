@@ -48,7 +48,8 @@
         >
           <span
             v-once
-            class="svg-icon inline icon-16"
+            v-if="currencyClass !== 'unlock'"
+            class="svg-icon inline icon-16 mr-1"
             v-html="icons[currencyClass]"
           ></span>
           <span
@@ -127,6 +128,10 @@
     border-radius: 4px;
     background-color: $white;
     box-shadow: 0 1px 3px 0 rgba($black, 0.12), 0 1px 2px 0 rgba($black, 0.24);
+
+    &.locked .price {
+      opacity: 0.5;
+    }
   }
 
   .item:not(.locked) {
@@ -156,8 +161,8 @@
       background-color: rgba($blue-50, 0.15);
     }
 
-    .svg-icon {
-      margin-right: 4px;
+    &.unlock {
+      background-color: rgba($gray-400, 0.15);
     }
   }
 
@@ -176,6 +181,10 @@
       color: $yellow-1;
     }
 
+    &.unlock {
+      color: $gray-100;
+    }
+
     &.hourglasses {
       color: $blue-1;
     }
@@ -188,6 +197,7 @@
     right: 8px;
     top: 8px;
     margin-top: 0;
+    color: $gray-200;
   }
 
   span.badge.badge-pill.badge-item.badge-clock {
@@ -209,7 +219,7 @@
   .suggestedDot {
     width: 6px;
     height: 6px;
-    background-color: $suggested-item-color;
+    background-color: $purple-400;
     border-radius: 4px;
 
     position: absolute;
@@ -237,7 +247,6 @@ import svgClock from '@/assets/svg/clock.svg';
 import EquipmentAttributesPopover from '@/components/inventory/equipment/attributesPopover';
 
 import QuestInfo from './quests/questInfo.vue';
-
 
 import seasonalShopConfig from '@/../../common/script/libs/shops-seasonal.config';
 
@@ -274,6 +283,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    owned: {
+      type: Boolean,
+      default: false,
+    },
   },
   data () {
     return Object.freeze({
@@ -293,6 +306,7 @@ export default {
       return false;
     },
     currencyClass () {
+      if (this.item.unlockCondition && this.item.unlockCondition.condition === 'party invite' && !this.owned) return 'unlock';
       if (this.item.currency && this.icons[this.item.currency]) {
         return this.item.currency;
       }
@@ -308,6 +322,7 @@ export default {
       this.$emit('click', {});
     },
     getPrice () {
+      if (this.item.unlockCondition && this.item.unlockCondition.condition === 'party invite' && !this.owned) return this.item.unlockCondition.text();
       if (this.price === -1) {
         return this.item.value;
       }

@@ -168,9 +168,7 @@ export default {
       return this.$t(classType);
     },
     gearSelected (item) {
-      if (!item.locked) {
-        this.$root.$emit('buyModal::showItem', item);
-      }
+      this.$root.$emit('buyModal::showItem', item);
     },
     filterGearItems () {
       const category = _filter(this.marketGearCategories, ['identifier', this.selectedGroupGearByClass]);
