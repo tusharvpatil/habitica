@@ -3580,6 +3580,7 @@ const quests = {
     completion: t('questWaffleCompletion'),
     value: 4,
     category: 'hatchingPotion',
+    limited: true,
     boss: {
       name: t('questWaffleBoss'),
       hp: 500,
