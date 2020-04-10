@@ -87,7 +87,7 @@
       <questDialogDrops :item="item" />
     </div>
     <div
-      v-if="item.limited"
+      v-if="item.event"
       class="limitedTime"
     >
       <span
