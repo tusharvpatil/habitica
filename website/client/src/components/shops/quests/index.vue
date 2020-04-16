@@ -302,7 +302,7 @@
                 <h4 class="popover-content-title">{{ item.text }}</h4>
                 <questInfo
                   :quest="item"
-                  :popoverVersion="true"
+                  :popover-version="true"
                 />
               </div>
             </span>
