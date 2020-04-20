@@ -109,7 +109,6 @@
             v-for="reward in inAppRewards"
             :key="reward.key"
             :item="reward"
-            :highlight-border="reward.isSuggested"
             :show-popover="showPopovers"
             :popover-position="'left'"
             @click="openBuyDialog(reward)"

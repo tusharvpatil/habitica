@@ -48,7 +48,7 @@
         >
           <span
             v-once
-            v-if="currencyClass !== 'unlock'"
+            :class="{ 'w-0': currencyClass === 'unlock'}"
             class="svg-icon inline icon-16 mr-1"
             v-html="icons[currencyClass]"
           ></span>
@@ -231,6 +231,10 @@
   .icon-48 {
     width: 48px;
     height: 48px;
+  }
+
+  .w-0 {
+    width: 0rem;
   }
 </style>
 
