@@ -4,7 +4,7 @@ const api = {};
 
 // @TODO export this const, cannot export it from here because only routes are exported from
 // controllers
-const LAST_ANNOUNCEMENT_TITLE = 'APRIL BACKGROUNDS AND ENCHANTED ARMOIRE ITEMS!';
+const LAST_ANNOUNCEMENT_TITLE = 'BLOG POST: HALL OF HEROES';
 const worldDmg = { // @TODO
   bailey: false,
 };
@@ -31,25 +31,24 @@ api.getNews = {
           <div class="mr-3 ${baileyClass}"></div>
           <div class="media-body">
             <h1 class="align-self-center">${res.t('newStuff')}</h1>
-            <h2>4/6/2020 - ${LAST_ANNOUNCEMENT_TITLE}</h2>
+            <h2>4/16/2020 - ${LAST_ANNOUNCEMENT_TITLE}</h2>
           </div>
         </div>
         <hr/>
-        <div class="promo_armoire_backgrounds_202004 center-block"></div>
+        <img
+          src="https://habitica-assets.s3.us-east-1.amazonaws.com/mobileApp/images/promo_hall_of_heroes.png"
+          style='width: 100%'>
+        </img>
         <p>
-          We’ve added three new backgrounds to the Background Shop! Now your avatar can splash in a
-          Rainy Barnyard, enjoy the aroma of a Heather Field, and gaze at shapeshifting Animal
-          Clouds. Check them out under User Icon > Backgrounds on web and Menu > Inventory >
-          Customize Avatar on mobile!
+          This month's <a href='https://habitica.wordpress.com/2020/04/15/hall-of-heroes/'
+          target='_blank'>featured Wiki article</a> is about the Hall of Heroes! We hope that it
+          will help you as learn about Habitica's community and contributors. Be sure to check it
+          out, and let us know what you think by reaching out on <a
+          href='https://twitter.com/habitica' target='_blank'>Twitter</a>, <a
+          href='http://blog.habitrpg.com' target='_blank'>Tumblr</a>, and <a
+          href='https://facebook.com/habitica' target='_blank'>Facebook</a>.
         </p>
-        <p>
-          Plus, there’s new Gold-purchasable equipment in the Enchanted Armoire, including the
-          Paper Knight Set. Better work hard on your real-life tasks to earn all the pieces!
-          Enjoy :)
-        </p>
-        <div class="small mb-3">
-          by QuartzFox, gawrone, ravenlune, shanaqui, katieslug, -Tyr-, and SabreCat
-        </div>
+        <div class="small mb-3">by shanaqui and the Wiki Wizards</div>
       </div>
       `,
     });
