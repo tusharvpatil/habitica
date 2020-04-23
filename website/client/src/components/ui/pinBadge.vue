@@ -46,11 +46,11 @@ export default {
     },
   },
   data () {
-    return Object.freeze({
-      icons: {
+    return {
+      icons: Object.freeze({
         pin: svgPin,
-      },
-    });
+      }),
+    };
   },
 };
 </script>
