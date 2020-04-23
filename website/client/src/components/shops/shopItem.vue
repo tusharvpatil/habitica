@@ -128,14 +128,11 @@
     border-radius: 4px;
     background-color: $white;
     box-shadow: 0 1px 3px 0 rgba($black, 0.12), 0 1px 2px 0 rgba($black, 0.24);
+    cursor: pointer;
 
     &.locked .price {
       opacity: 0.5;
     }
-  }
-
-  .item:not(.locked) {
-    cursor: pointer;
   }
 
   .image {

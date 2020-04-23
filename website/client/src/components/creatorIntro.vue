@@ -235,18 +235,12 @@
               ></div>
               <span class="price">1</span>
             </div>
-            <span
-              v-if="!user.purchased.background[bg.key]"
-              class="badge badge-pill badge-item badge-svg"
-              :class="{
-                'item-selected-badge': isBackgroundPinned(bg),
-                'hide': !isBackgroundPinned(bg)}"
-              @click.prevent.stop="togglePinned(bg)"
-            >
-              <span
-                class="svg-icon inline icon-12 color"
-                v-html="icons.pin"
-              ></span>
+            <span @click.stop.prevent="togglePinned(bg)">
+              <pin-badge
+                class="badge badge-item"
+                v-if="!user.purchased.background[bg.key]"
+                :pinned="isBackgroundPinned(bg)"
+              />
             </span>
           </div>
         </div>
@@ -303,18 +297,12 @@
                 ></div>
                 <span class="price">7</span>
               </div>
-              <span
-                v-if="!user.purchased.background[bg.key]"
-                class="badge badge-pill badge-item badge-svg"
-                :class="{
-                  'item-selected-badge': isBackgroundPinned(bg),
-                  'hide': !isBackgroundPinned(bg)}"
-                @click.prevent.stop="togglePinned(bg)"
-              >
-                <span
-                  class="svg-icon inline icon-12 color"
-                  v-html="icons.pin"
-                ></span>
+              <span @click.stop.prevent="togglePinned(bg)">
+                <pin-badge
+                  class="badge badge-item"
+                  v-if="!user.purchased.background[bg.key]"
+                  :pinned="isBackgroundPinned(bg)"
+                />
               </span>
             </div>
             <div
@@ -1095,19 +1083,6 @@
       }
     }
 
-    .badge-svg {
-      left: calc((100% - 18px) / 2);
-      cursor: pointer;
-      color: $gray-400;
-      background: $white;
-      padding: 4.5px 6px;
-
-      &.item-selected-badge {
-        background: $purple-300;
-        color: $white;
-      }
-    }
-
     .icon-12 {
       width: 12px;
       height: 12px;
@@ -1123,10 +1098,16 @@
 
     .background-button {
       margin-bottom: 15px;
-    }
 
-    .background-button:hover {
-      span.badge.badge-pill.badge-item.badge-svg.hide {
+      .badge-pin {
+        left: calc((100% - 18px) / 2);
+
+        &:not(.pinned) {
+          display: none;
+        }
+      }
+
+      &:hover .badge-pin {
         display: block;
       }
     }
@@ -1142,6 +1123,7 @@ import usernameForm from './settings/usernameForm';
 import shops from '@/../../common/script/libs/shops';
 import guide from '@/mixins/guide';
 import notifications from '@/mixins/notifications';
+import pinBadge from '@/components/ui/pinBadge';
 import toggleSwitch from '@/components/ui/toggleSwitch';
 import bodySettings from './avatarModal/body-settings';
 import skinSettings from './avatarModal/skin-settings';
@@ -1158,7 +1140,6 @@ import backgroundsIcon from '@/assets/svg/backgrounds.svg';
 import gem from '@/assets/svg/gem.svg';
 import hourglass from '@/assets/svg/hourglass.svg';
 import gold from '@/assets/svg/gold.svg';
-import pin from '@/assets/svg/pin.svg';
 import arrowRight from '@/assets/svg/arrow_right.svg';
 import arrowLeft from '@/assets/svg/arrow_left.svg';
 import svgClose from '@/assets/svg/close.svg';
@@ -1170,14 +1151,14 @@ import content from '@/../../common/script/content/index';
 export default {
   components: {
     avatar,
+    bodySettings,
+    extraSettings,
+    hairSettings,
+    pinBadge,
+    skinSettings,
+    subMenu,
     toggleSwitch,
     usernameForm,
-    bodySettings,
-    skinSettings,
-    hairSettings,
-    extraSettings,
-
-    subMenu,
   },
   mixins: [guide, notifications, avatarEditorUtilies],
   data () {
@@ -1198,7 +1179,6 @@ export default {
         backgroundsIcon,
         gem,
         hourglass,
-        pin,
         gold,
         arrowRight,
         arrowLeft,
