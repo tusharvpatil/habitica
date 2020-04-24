@@ -49,7 +49,6 @@
         <shopItem
           :key="ctx.item.key"
           :item="ctx.item"
-          :empty-item="userItems.gear[ctx.item.key] === undefined"
           :popover-position="'top'"
           @click="gearSelected(ctx.item)"
         >
@@ -196,12 +195,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .equipment-rows {
-    ::v-deep .item.item-empty {
-      background: white;
-    }
-  }
-
   .badge-pin:not(.pinned) {
       display: none;
     }
