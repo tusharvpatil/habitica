@@ -58,14 +58,12 @@
             slot-scope="ctx"
           >
             <span
-              class="badge badge-pill badge-item badge-svg"
-              :class="{'item-selected-badge': ctx.item.pinned, 'hide': !ctx.item.pinned}"
+              class="badge-top"
               @click.prevent.stop="togglePinned(ctx.item)"
             >
-              <span
-                class="svg-icon inline icon-12 color"
-                v-html="icons.pin"
-              ></span>
+              <pin-badge
+                :pinned="ctx.item.pinned"
+              />
             </span>
           </template>
         </shopItem>
@@ -81,11 +79,11 @@ import { mapState } from '@/libs/store';
 import LayoutSection from '@/components/ui/layoutSection';
 import FilterDropdown from '@/components/ui/filterDropdown';
 import ItemRows from '@/components/ui/itemRows';
+import PinBadge from '@/components/ui/pinBadge';
 import ShopItem from '../shopItem';
 
 import shops from '@/../../common/script/libs/shops';
 
-import svgPin from '@/assets/svg/pin.svg';
 import svgWarrior from '@/assets/svg/warrior.svg';
 import svgWizard from '@/assets/svg/wizard.svg';
 import svgRogue from '@/assets/svg/rogue.svg';
@@ -112,6 +110,7 @@ export default {
     LayoutSection,
     FilterDropdown,
     ItemRows,
+    PinBadge,
     ShopItem,
   },
   mixins: [pinUtils],
@@ -122,7 +121,6 @@ export default {
       selectedSortGearBy: sortGearTypes[0],
       selectedGroupGearByClass: '',
       icons: Object.freeze({
-        pin: svgPin,
         warrior: svgWarrior,
         wizard: svgWizard,
         rogue: svgRogue,
@@ -202,5 +200,13 @@ export default {
     ::v-deep .item.item-empty {
       background: white;
     }
+  }
+
+  .badge-pin:not(.pinned) {
+      display: none;
+    }
+
+  .item:hover .badge-pin {
+    display: block;
   }
 </style>
