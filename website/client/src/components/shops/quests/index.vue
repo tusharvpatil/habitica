@@ -100,14 +100,12 @@
                   slot-scope="ctx"
                 >
                   <span
-                    class="badge badge-pill badge-item badge-svg"
-                    :class="{'item-selected-badge': ctx.item.pinned, 'hide': !ctx.item.pinned}"
+                    class="badge-top"
                     @click.prevent.stop="togglePinned(ctx.item)"
                   >
-                    <span
-                      class="svg-icon inline icon-12 color"
-                      v-html="icons.pin"
-                    ></span>
+                    <pin-badge
+                      :pinned="ctx.item.pinned"
+                    />
                   </span>
                 </template>
               </shopItem>
@@ -185,14 +183,12 @@
                 slot-scope="ctx"
               >
                 <span
-                  class="badge badge-pill badge-item badge-svg"
-                  :class="{'item-selected-badge': ctx.item.pinned, 'hide': !ctx.item.pinned}"
+                  class="badge-top"
                   @click.prevent.stop="togglePinned(ctx.item)"
                 >
-                  <span
-                    class="svg-icon inline icon-12 color"
-                    v-html="icons.pin"
-                  ></span>
+                  <pin-badge
+                    :pinned="ctx.item.pinned"
+                  />
                 </span>
                 <countBadge
                   :show="userItems.quests[ctx.item.key] > 0"
@@ -265,14 +261,12 @@
                   slot-scope="ctx"
                 >
                   <span
-                    class="badge badge-pill badge-item badge-svg"
-                    :class="{'item-selected-badge': ctx.item.pinned, 'hide': !ctx.item.pinned}"
+                    class="badge-top"
                     @click.prevent.stop="togglePinned(ctx.item)"
                   >
-                    <span
-                      class="svg-icon inline icon-12 color"
-                      v-html="icons.pin"
-                    ></span>
+                    <pin-badge
+                      :pinned="ctx.item.pinned"
+                    />
                   </span>
                   <countBadge
                     :show="userItems.quests[ctx.item.key] > 0"
@@ -311,14 +305,12 @@
               slot-scope="ctx"
             >
               <span
-                class="badge badge-pill badge-item badge-svg"
-                :class="{'item-selected-badge': ctx.item.pinned, 'hide': !ctx.item.pinned}"
+                class="badge-top"
                 @click.prevent.stop="togglePinned(ctx.item)"
               >
-                <span
-                  class="svg-icon inline icon-12 color"
-                  v-html="icons.pin"
-                ></span>
+                <pin-badge
+                  :pinned="ctx.item.pinned"
+                />
               </span>
               <countBadge
                 :show="userItems.quests[ctx.item.key] > 0"
@@ -354,42 +346,6 @@
   @import '~@/assets/scss/colors.scss';
   @import '~@/assets/scss/variables.scss';
 
-  .badge-svg {
-    left: calc((100% - 18px) / 2);
-    cursor: pointer;
-    color: $gray-400;
-    background: $white;
-    padding: 4.5px 6px;
-
-    &.item-selected-badge {
-      background: $purple-300;
-      color: $white;
-    }
-  }
-
-  span.badge.badge-pill.badge-item.badge-svg:not(.item-selected-badge) {
-    color: #a5a1ac;
-  }
-
-  span.badge.badge-pill.badge-item.badge-svg.hide {
-    display: none;
-  }
-
-  .item:hover {
-    span.badge.badge-pill.badge-item.badge-svg.hide {
-      display: block;
-    }
-  }
-
-  .icon-12 {
-    width: 12px;
-    height: 12px;
-  }
-
-  .hand-cursor {
-    cursor: pointer;
-  }
-
   .featured-label {
     margin: 24px auto;
   }
@@ -421,6 +377,15 @@
     .standard-page {
       position: relative;
     }
+
+    .badge-pin:not(.pinned) {
+        display: none;
+      }
+
+    .item:hover .badge-pin {
+      display: block;
+    }
+
     .featuredItems {
       height: 216px;
 
@@ -503,9 +468,8 @@ import pinUtils from '@/mixins/pinUtils';
 import currencyMixin from '../_currencyMixin';
 
 import BuyModal from './buyQuestModal.vue';
+import PinBadge from '@/components/ui/pinBadge';
 import QuestInfo from './questInfo.vue';
-
-import svgPin from '@/assets/svg/pin.svg';
 
 import shops from '@/../../common/script/libs/shops';
 
@@ -521,6 +485,7 @@ export default {
     toggleSwitch,
 
     BuyModal,
+    PinBadge,
     QuestInfo,
   },
   mixins: [buyMixin, currencyMixin, pinUtils],
@@ -530,10 +495,6 @@ export default {
 
       searchText: null,
       searchTextThrottled: null,
-
-      icons: Object.freeze({
-        pin: svgPin,
-      }),
 
       sortItemsBy: ['AZ', 'sortByNumber'],
       selectedSortItemsBy: 'AZ',

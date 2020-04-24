@@ -16,9 +16,27 @@
   box-shadow: none;
 }
 
+.badge-dialog {
+  position: absolute;
+  left: -16px;
+  top: -16px;
+
+  .badge-pin {
+    width: 36px;
+    height: 36px;
+    padding: 0.5rem;
+  }
+}
+
 .badge-item {
   position: absolute;
   top: -9px;
+}
+
+.badge-top {
+  position: absolute;
+  left: calc((100% - 18px) / 2);
+  top: -12px;
 }
 
 .badge-purple {

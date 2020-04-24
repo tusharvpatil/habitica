@@ -1,6 +1,6 @@
 <template>
   <div
-    class="badge-pin align-items-center justify-content-center p-1"
+    class="badge-pin align-items-center justify-content-center"
     :class="{'pinned': pinned}"
   >
     <div
@@ -23,6 +23,7 @@
     transition: none;
     display: flex;
     cursor: pointer;
+    padding: 0.25rem;
 
     &:hover:not(.pinned) {
       color: $purple-300;

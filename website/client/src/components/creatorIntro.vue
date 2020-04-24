@@ -227,7 +227,7 @@
             ></i>
             <div
               v-if="!user.purchased.background[bg.key]"
-              class="purchase-background single"
+              class="purchase-background single d-flex align-items-center justify-content-center"
             >
               <div
                 class="svg-icon hourglass"
@@ -235,10 +235,12 @@
               ></div>
               <span class="price">1</span>
             </div>
-            <span @click.stop.prevent="togglePinned(bg)">
+            <span
+              v-if="!user.purchased.background[bg.key]"
+              class="badge-top"
+              @click.stop.prevent="togglePinned(bg)"
+            >
               <pin-badge
-                class="badge badge-item"
-                v-if="!user.purchased.background[bg.key]"
                 :pinned="isBackgroundPinned(bg)"
               />
             </span>
@@ -289,7 +291,7 @@
               ></i>
               <div
                 v-if="!user.purchased.background[bg.key]"
-                class="purchase-background single"
+                class="purchase-background single d-flex align-items-center justify-content-center"
               >
                 <div
                   class="svg-icon gem"
@@ -297,10 +299,12 @@
                 ></div>
                 <span class="price">7</span>
               </div>
-              <span @click.stop.prevent="togglePinned(bg)">
+              <span
+                v-if="!user.purchased.background[bg.key]"
+                class="badge-top"
+                @click.stop.prevent="togglePinned(bg)"
+              >
                 <pin-badge
-                  class="badge badge-item"
-                  v-if="!user.purchased.background[bg.key]"
                   :pinned="isBackgroundPinned(bg)"
                 />
               </span>
@@ -1083,28 +1087,11 @@
       }
     }
 
-    .icon-12 {
-      width: 12px;
-      height: 12px;
-    }
-
-    span.badge.badge-pill.badge-item.badge-svg:not(.item-selected-badge) {
-      color: #a5a1ac;
-    }
-
-    span.badge.badge-pill.badge-item.badge-svg.hide {
-      display: none;
-    }
-
     .background-button {
       margin-bottom: 15px;
 
-      .badge-pin {
-        left: calc((100% - 18px) / 2);
-
-        &:not(.pinned) {
-          display: none;
-        }
+      .badge-pin:not(.pinned) {
+        display: none;
       }
 
       &:hover .badge-pin {
@@ -1123,7 +1110,7 @@ import usernameForm from './settings/usernameForm';
 import shops from '@/../../common/script/libs/shops';
 import guide from '@/mixins/guide';
 import notifications from '@/mixins/notifications';
-import pinBadge from '@/components/ui/pinBadge';
+import PinBadge from '@/components/ui/pinBadge';
 import toggleSwitch from '@/components/ui/toggleSwitch';
 import bodySettings from './avatarModal/body-settings';
 import skinSettings from './avatarModal/skin-settings';
@@ -1154,7 +1141,7 @@ export default {
     bodySettings,
     extraSettings,
     hairSettings,
-    pinBadge,
+    PinBadge,
     skinSettings,
     subMenu,
     toggleSwitch,
