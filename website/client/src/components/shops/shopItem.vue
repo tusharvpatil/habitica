@@ -16,7 +16,7 @@
         ></slot>
         <span
           v-if="item.event && item.owned == null && showEventBadge"
-          class="badge badge-pill badge-item badge-clock"
+          class="badge badge-round badge-item badge-clock"
         >
           <span
             class="svg-icon inline clock"
@@ -197,7 +197,7 @@
     color: $gray-200;
   }
 
-  span.badge.badge-pill.badge-item.badge-clock {
+  span.badge.badge-round.badge-item.badge-clock {
     height: 24px;
     width: 24px;
     background-color: $purple-300;

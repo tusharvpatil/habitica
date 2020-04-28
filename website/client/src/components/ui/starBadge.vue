@@ -1,7 +1,7 @@
 <template>
   <span
     v-if="show"
-    class="badge badge-pill badge-item badge-star"
+    class="badge badge-round badge-item badge-star"
     :class="{'item-selected-badge': selected === true}"
     @click.stop="click"
   >
