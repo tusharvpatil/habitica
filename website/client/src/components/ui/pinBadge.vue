@@ -14,9 +14,6 @@
 @import '~@/assets/scss/colors.scss';
 
   .badge-pin {
-    height: 1.5rem;
-    width: 1.5rem;
-    box-shadow: 0 1px 3px 0 rgba($black, 0.12), 0 1px 2px 0 rgba($black, 0.24);
     background-color: $white;
     color: $gray-200;
     transition: none;

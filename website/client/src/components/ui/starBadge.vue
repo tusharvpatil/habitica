@@ -17,8 +17,6 @@
 @import '~@/assets/scss/colors.scss';
 
   .badge-star {
-    height: 1.5rem;
-    width: 1.5rem;
     cursor: pointer;
     display: none;
     left: -9px;
@@ -30,6 +28,10 @@
       display: block;
       background: $teal-50;
       color: $white;
+    }
+
+    &:hover:not(.item-selected-badge) {
+      color: $purple-300;
     }
 
     .svg-icon {

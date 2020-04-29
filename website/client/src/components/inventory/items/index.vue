@@ -84,7 +84,7 @@
           {{ $t(group.key) }}
           <span
             v-if="group.key != 'special'"
-            class="ml-2 badge badge-pill badge-default"
+            class="badge badge-pill badge-default ml-2"
           >{{ group.quantity }}</span>
         </h2>
         <itemRows
