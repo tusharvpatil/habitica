@@ -1,6 +1,6 @@
 <template>
   <div
-    class="badge-round badge-pin align-items-center justify-content-center"
+    class="badge badge-round badge-pin align-items-center justify-content-center"
     :class="{'pinned': pinned}"
   >
     <div
