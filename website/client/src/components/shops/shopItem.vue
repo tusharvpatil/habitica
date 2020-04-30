@@ -164,7 +164,6 @@
   }
 
   .price-label {
-    height: 16px;
     font-family: Roboto;
     font-size: 12px;
     font-weight: bold;
