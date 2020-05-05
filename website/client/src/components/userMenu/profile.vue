@@ -4,7 +4,7 @@
     class="profile"
   >
     <div class="header">
-      <div class="profile-actions">
+      <div class="profile-actions d-flex">
         <router-link
           :to="{ path: '/private-messages', query: { uuid: user._id } }"
           replace
