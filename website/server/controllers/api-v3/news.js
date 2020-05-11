@@ -1,10 +1,11 @@
 import { authWithHeaders } from '../../middlewares/auth';
+import { model as NewsPost } from '../../models/newsPost';
 
 const api = {};
 
 // @TODO export this const, cannot export it from here because only routes are exported from
 // controllers
-const LAST_ANNOUNCEMENT_TITLE = 'MAY BACKGROUNDS AND ARMOIRE ITEMS!';
+
 const worldDmg = { // @TODO
   bailey: false,
 };
@@ -24,32 +25,43 @@ api.getNews = {
   async handler (req, res) {
     const baileyClass = worldDmg.bailey ? 'npc_bailey_broken' : 'npc_bailey';
 
-    res.status(200).send({
-      html: `
-      <div class="bailey">
-        <div class="media align-items-center">
-          <div class="mr-3 ${baileyClass}"></div>
-          <div class="media-body">
-            <h1 class="align-self-center">${res.t('newStuff')}</h1>
-            <h2>5/5/2020 - ${LAST_ANNOUNCEMENT_TITLE}</h2>
+    const lastNewsPost = NewsPost.lastNewsPost();
+    if (lastNewsPost) {
+      res.status(200).send({
+        html: `
+        <div class="bailey">
+          <div class="media align-items-center">
+            <div class="mr-3 ${baileyClass}"></div>
+            <div class="media-body">
+              <h1 class="align-self-center">${res.t('newStuff')}</h1>
+              <h2>${lastNewsPost.title}</h2>
+            </div>
+          </div>
+          <hr/>
+          <div class="promo_armoire_backgrounds_202005 center-block"></div>
+          <p>
+            ${lastNewsPost.text}
+          </p>
+          <div class="small">
+            ${lastNewsPost.credits}
           </div>
         </div>
-        <hr/>
-        <div class="promo_armoire_backgrounds_202005 center-block"></div>
-        <p>
-          We’ve added three new backgrounds to the Background Shop! Now your avatar can soar in a
-          Hot Air Balloon, pick fresh treats in a Strawberry Patch, and caper on Habit City
-          Rooftops. Check them out under User Icon > Backgrounds on web and Menu > Inventory >
-          Customize Avatar on mobile!
-        </p>
-        <p>
-          Plus, there’s new gold-purchasable equipment in the Enchanted Armoire, including the
-          Fiddler Set. Better work hard on your real-life tasks to earn all the pieces! Enjoy :)
-        </p>
-        <div class="small mb-3">by FolleMente, QuartzFox, Katy133, weeWitch, and Ricardo</div>
-      </div>
-      `,
-    });
+        `,
+      });
+    } else {
+      res.status(200).send({
+        html: `
+        <div class="bailey">
+          <div class="media align-items-center">
+            <div class="mr-3 ${baileyClass}"></div>
+            <div class="media-body">
+              <h1 class="align-self-center">${res.t('newStuff')}</h1>
+            </div>
+          </div>
+        </div>
+        `,
+      });
+    }
   },
 };
 
@@ -71,11 +83,14 @@ api.tellMeLaterNews = {
   async handler (req, res) {
     const { user } = res.locals;
 
-    user.flags.newStuff = false;
+    const { id, title } = NewsPost.lastNewsPost();
+    user.flags.lastNewStuffRead = id;
 
-    const existingNotificationIndex = user.notifications.findIndex(n => n && n.type === 'NEW_STUFF');
-    if (existingNotificationIndex !== -1) user.notifications.splice(existingNotificationIndex, 1);
-    user.addNotification('NEW_STUFF', { title: LAST_ANNOUNCEMENT_TITLE }, true); // seen by default
+    if (user.notifications) {
+      const existingNotificationIndex = user.notifications.findIndex(n => n && n.type === 'NEW_STUFF');
+      if (existingNotificationIndex !== -1) user.notifications.splice(existingNotificationIndex, 1);
+    }
+    user.addNotification('NEW_STUFF', { title: title.toUpperCase() }, true); // seen by default
 
     await user.save();
     res.respond(200, {});

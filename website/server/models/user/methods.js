@@ -22,6 +22,7 @@ import * as inboxLib from '../../libs/inbox'; // eslint-disable-line import/no-c
 import amazonPayments from '../../libs/payments/amazon'; // eslint-disable-line import/no-cycle
 import stripePayments from '../../libs/payments/stripe'; // eslint-disable-line import/no-cycle
 import paypalPayments from '../../libs/payments/paypal'; // eslint-disable-line import/no-cycle
+import { model as NewsPost } from '../newsPost';
 
 const { daysSince } = common;
 
@@ -295,6 +296,13 @@ schema.statics.transformJSONUser = function transformJSONUser (jsonUser, addComp
   if (!jsonUser.flags.verifiedUsername) jsonUser.auth.local.username = null;
 
   if (addComputedStats) this.addComputedStatsToJSONObj(jsonUser.stats, jsonUser);
+
+  jsonUser.flags.newStuff = this.checkNewStuff(jsonUser.flags.lastNewStuffRead);
+};
+
+schema.statics.checkNewStuff = function checkNewStuff (lastReadID) {
+  const lastNewsPost = NewsPost.lastNewsPost();
+  return Boolean(lastNewsPost && lastReadID !== lastNewsPost._id);
 };
 
 // Add stats.toNextLevel, stats.maxMP and stats.maxHealth
@@ -488,6 +496,15 @@ schema.methods.isMemberOfGroupPlan = async function isMemberOfGroupPlan () {
 
 schema.methods.isAdmin = function isAdmin () {
   return this.contributor && this.contributor.admin;
+};
+
+schema.methods.isNewsPoster = function isNewsPoster () {
+  return this.contributor && this.contributor.newsPoster;
+};
+
+schema.methods.checkNewStuff = function checkNewStuff () {
+  const lastNewsPost = NewsPost.lastNewsPost();
+  return Boolean(lastNewsPost && this.flags.lastNewStuffRead !== lastNewsPost._id);
 };
 
 // When converting to json add inbox messages from the Inbox collection

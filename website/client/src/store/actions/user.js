@@ -174,6 +174,15 @@ export function unblock (store, params) {
   return axios.post(`/api/v4/user/block/${params.uuid}`);
 }
 
+export function newStuffRead (store) {
+  store.state.user.data.flags.newStuff = false;
+  return axios.post('/api/v4/news/read');
+}
+
+export function getNews () {
+  return axios.get('/api/v4/news');
+}
+
 export function markPrivMessagesRead (store) {
   markPMSRead(store.state.user.data);
   return axios.post('/api/v4/user/mark-pms-read');

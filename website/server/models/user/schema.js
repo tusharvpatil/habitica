@@ -157,6 +157,7 @@ export default new Schema({
       max: 9,
     },
     admin: Boolean,
+    newsPoster: Boolean,
     sudo: Boolean,
     // Artisan, Friend, Blacksmith, etc
     text: String,
@@ -244,7 +245,9 @@ export default new Schema({
     },
     dropsEnabled: { $type: Boolean, default: false }, // unused
     itemsEnabled: { $type: Boolean, default: false },
-    newStuff: { $type: Boolean, default: false },
+    lastNewStuffRead: { $type: String, default: '' },
+    // Was changed to be a computed , so that it doesn't have to be updated for each bailey post.
+    // newStuff: { $type: Boolean, default: false },
     rewrite: { $type: Boolean, default: true },
     classSelected: { $type: Boolean, default: false },
     mathUpdates: Boolean,

@@ -35,8 +35,10 @@ app.use('/api/v3', v3Router);
 const v4RouterOverrides = [
   // 'GET-/status', Example to override the GET /status api call
   'POST-/user/auth/local/register',
+  'GET-/news',
   'GET-/user',
   'PUT-/user',
+  'POST-/news/tell-me-later',
   'POST-/user/class/cast/:spellId',
   'POST-/user/rebirth',
   'POST-/user/reset',
