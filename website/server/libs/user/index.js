@@ -26,6 +26,8 @@ export async function get (req, res, { isV3 = false }) {
     userToJSON.needsCron = false;
     if (daysMissed > 0) userToJSON.needsCron = true;
     User.addComputedStatsToJSONObj(userToJSON.stats, userToJSON);
+
+    userToJSON.flags.newStuff = User.checkNewStuff(userToJSON.flags.lastNewStuffRead);
   }
 
   return res.respond(200, userToJSON);
