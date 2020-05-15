@@ -156,7 +156,7 @@ export default {
       this.posts = this.posts.slice(0, 2);
     }
   },
-  destroyed () {
+  beforeDestroy () {
     this.$root.$off('bv::show::modal');
   },
   methods: {

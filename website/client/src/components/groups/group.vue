@@ -487,10 +487,15 @@ export default {
       }
     },
   },
-  mounted () {
+  async mounted () {
     if (this.isParty) this.searchId = 'party';
     if (!this.searchId) this.searchId = this.groupId;
-    this.load();
+    await this.fetchGuild();
+
+    this.$root.$on('updatedGroup', this.onGroupUpdate);
+  },
+  beforeDestroy () {
+    this.$root.$off('updatedGroup', this.onGroupUpdate);
   },
   beforeRouteUpdate (to, from, next) {
     this.$set(this, 'searchId', to.params.groupId);
@@ -501,19 +506,9 @@ export default {
     acceptCommunityGuidelines () {
       this.$store.dispatch('user:set', { 'flags.communityGuidelinesAccepted': true });
     },
-    async load () {
-      if (this.isParty) {
-        this.searchId = 'party';
-        // @TODO: Set up from old client. Decide what we need and what we don't
-        // Check Desktop notifs
-        // Load invites
-      }
-      await this.fetchGuild();
-
-      this.$root.$on('updatedGroup', group => {
-        const updatedGroup = extend(this.group, group);
-        this.$set(this.group, updatedGroup);
-      });
+    onGroupUpdate (group) {
+      const updatedGroup = extend(this.group, group);
+      this.$set(this.group, updatedGroup);
     },
 
     /**
@@ -565,12 +560,10 @@ export default {
 
       const groupId = this.searchId === 'party' ? this.user.party._id : this.searchId;
       if (this.hasUnreadMessages(groupId)) {
-        // Delay by 1sec to make sure it returns after
-        // other requests that don't have the notification marked as read
-        setTimeout(() => {
-          this.$store.dispatch('chat:markChatSeen', { groupId });
-          this.$delete(this.user.newMessages, groupId);
-        }, 1000);
+        const notification = this.user
+          .notifications.find(n => n.type === 'NEW_CHAT_MESSAGE' && n.data.group.id === groupId);
+        const notificationId = notification && notification.id;
+        this.$store.dispatch('chat:markChatSeen', { groupId, notificationId });
       }
 
       this.members = await this.loadMembers({
@@ -578,6 +571,7 @@ export default {
         includeAllPublicFields: true,
       });
     },
+    // returns the notification id or false
     hasUnreadMessages (groupId) {
       if (this.user.newMessages[groupId]) return true;
 
