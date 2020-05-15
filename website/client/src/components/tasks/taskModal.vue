@@ -163,14 +163,22 @@
               </span>
             </div>
           </draggable>
-          <input
-            v-model="newChecklistItem"
-            class="inline-edit-input checklist-item form-control"
-            type="text"
-            :placeholder="$t('newChecklistItem')"
-            @keypress.enter="setHasPossibilityOfIMEConversion(false)"
-            @keyup.enter="addChecklistItem($event)"
-          >
+          <div  class="inline-edit-input-group checklist-group input-group">
+            <span class="input-group-prepend new-icon"
+                 v-html="icons.positive">
+
+            </span>
+
+            <input
+              v-model="newChecklistItem"
+              class="inline-edit-input checklist-item form-control"
+              type="text"
+              :placeholder="$t('newChecklistItem')"
+              @keypress.enter="setHasPossibilityOfIMEConversion(false)"
+              @keyup.enter="addChecklistItem($event)"
+            >
+          </div>
+
         </div>
         <div
           v-if="task.type === 'habit'"
@@ -316,25 +324,15 @@
                 v-once
                 class="d-block m-b-xs"
               >{{ $t('repeatOn') }}</label>
-              <div
-                v-for="(day, dayNumber) in ['su','m','t','w','th','f','s']"
-                :key="dayNumber"
-                class="form-check-inline weekday-check mr-0"
-              >
-                <div class="custom-control custom-checkbox custom-control-inline">
-                  <input
-                    :id="`weekday-${dayNumber}`"
-                    v-model="task.repeat[day]"
-                    class="custom-control-input"
-                    type="checkbox"
-                    :disabled="challengeAccessRequired"
-                  >
-                  <label
-                    v-once
-                    class="custom-control-label m-b-xs"
-                    :for="`weekday-${dayNumber}`"
-                  >{{ weekdaysMin(dayNumber) }}</label>
-                </div>
+              <div class="toggle-group">
+                <toggle-checkbox
+                  v-for="(day, dayNumber) in ['su','m','t','w','th','f','s']"
+                  :tab-index="dayNumber"
+                  :key="dayNumber"
+                  :checked.sync="task.repeat[day]"
+                  :disabled="groupAccessRequiredAndOnPersonalPage || challengeAccessRequired"
+                  :text="weekdaysMin(dayNumber)"
+                />
               </div>
             </div>
           </template>
@@ -547,10 +545,10 @@
               >
                 <div class="form-group">
                   <label v-once class="m-b-xs">{{ $t('restoreStreak') }}</label>
-                  <div class="row">
+                  <div class="row streak-inputs">
                     <div
                       v-if="task.up"
-                      class="col-6"
+                      class="col-6 positive"
                     >
                       <div class="input-group">
                         <div class="input-group-prepend positive-addon input-group-icon">
@@ -570,7 +568,7 @@
                     </div>
                     <div
                       v-if="task.down"
-                      class="col-6"
+                      class="col-6 negative"
                     >
                       <div class="input-group">
                         <div class="input-group-prepend negative-addon input-group-icon">
@@ -758,6 +756,20 @@
       .checklist-item {
         padding-left: 12px;
       }
+
+      .new-icon {
+        cursor: default;
+        margin-left: 3px;
+        margin-right: -3px;
+
+        svg {
+          width: 1rem;
+          height: 1rem;
+          object-fit: contain;
+
+          fill: $gray-200;
+        }
+      }
     }
 
     span.grippy {
@@ -775,15 +787,6 @@
       border-radius: 0px;
       border: none !important;
       padding-left: 36px;
-
-      &:last-child {
-        background-repeat: no-repeat;
-        background-position: center left 10px;
-        border-top: 1px solid $gray-500 !important;
-        border-bottom: 1px solid $gray-500 !important;
-        background-size: 10px 10px;
-        background-image: url(~@/assets/svg/for-css/positive.svg);
-      }
     }
 
     .checklist-group {
@@ -853,8 +856,9 @@
 
     .advanced-settings {
       background: $gray-700;
-      padding: 16px 24px;
+      padding: 0.75rem 1.5rem;
       margin: -8px -24px;
+      margin-top: 1.5rem;
 
       &-toggle {
         cursor: pointer;
@@ -967,6 +971,15 @@
     }
   }
 
+  .streak-inputs {
+    .positive {
+      padding-right: 6px;
+    }
+
+    .negative {
+      padding-left: 6px;
+    }
+  }
 </style>
 
 <script>
@@ -977,6 +990,7 @@ import uuid from 'uuid';
 import draggable from 'vuedraggable';
 import toggleSwitch from '@/components/ui/toggleSwitch';
 import checkbox from '@/components/ui/checkbox';
+import toggleCheckbox from '@/components/ui/toggleCheckbox';
 import markdownDirective from '@/directives/markdown';
 import { mapGetters, mapActions, mapState } from '@/libs/store';
 import SelectTag from './modal-controls/selectTag';
@@ -1002,6 +1016,7 @@ export default {
     selectDifficulty,
     selectTranslatedArray,
     checkbox,
+    toggleCheckbox,
   },
   directives: {
     markdown: markdownDirective,
