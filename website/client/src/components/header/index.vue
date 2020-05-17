@@ -223,7 +223,7 @@ export default {
     });
   },
   beforeDestroy () {
-    this.$root.off('inviteModal::inviteToGroup');
+    this.$root.$off('inviteModal::inviteToGroup');
   },
   methods: {
     ...mapActions({
@@ -250,6 +250,7 @@ export default {
         groupId: party.data._id,
         viewingMembers: this.partyMembers,
         group: party.data,
+        fetchMoreMembers: p => this.$store.dispatch('members:getGroupMembers', p),
       });
     },
     setPartyMembersWidth ($event) {
