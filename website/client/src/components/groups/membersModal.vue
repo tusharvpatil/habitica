@@ -99,14 +99,20 @@
           </div>
         </div>
       </div>
-      <div v-if="selectedPage === 'members'">
+      <div
+        v-if="selectedPage === 'members'"
+        :class="{'mt-1': invites.length === 0}"
+      >
         <div
           v-for="(member, index) in sortedMembers"
           :key="member._id"
           class="row"
         >
           <div class="col-11 no-padding-left">
-            <member-details :member="member" />
+            <member-details
+              :member="member"
+              :class-badge-position="'next-to-name'"
+            />
           </div>
           <div class="col-1 actions">
             <b-dropdown right="right">
@@ -270,6 +276,8 @@
     .modal-body {
       padding-left: 0;
       padding-right: 0;
+      padding-bottom: 0;
+      padding-top: 0;
     }
 
     .member-details {
